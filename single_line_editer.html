@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Single Line Editer</title>
+    <title>Graph Editor</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a1a1a;
+            background: #1e1e1e;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             margin: 0;
             padding: 20px;
-            color: #fff;
         }
 
         .container {
@@ -16,167 +16,120 @@
             width: 800px;
             height: 800px;
             margin: 20px auto;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-            border-radius: 12px;
+            border-radius: 8px;
             overflow: hidden;
-            border: 1px solid #333;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
         }
 
         canvas {
-            background: #2a2a2a;
+            background: #2d2d2d;
             position: absolute;
             top: 0;
             left: 0;
+            width: 800px;
+            height: 800px;
         }
 
         .controls {
-            background: #2a2a2a;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            margin: 15px auto;
-            max-width: 800px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 25px;
-            border: 1px solid #333;
+            margin: 15px 0;
+            text-align: center;
+            background: #252526;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
         .radio-group {
-            display: flex;
-            gap: 20px;
-        }
-
-        .radio-label {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            padding: 10px 20px;
+            display: inline-flex;
             background: #333;
-            border-radius: 25px;
-            transition: all 0.3s;
-            user-select: none;
-        }
-
-        .radio-label:hover {
-            background: #444;
-            transform: translateY(-2px);
+            border-radius: 6px;
+            padding: 4px;
+            margin: 0 10px;
         }
 
         input[type="radio"] {
-            margin-right: 8px;
-            accent-color: #00ff88;
+            display: none;
         }
 
-        #curvatureSlider {
-            width: 200px;
-            -webkit-appearance: none;
-            height: 4px;
-            background: #333;
-            border-radius: 2px;
-            outline: none;
-        }
-
-        #curvatureSlider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            background: #00ff88;
-            border-radius: 50%;
+        input[type="radio"] + label {
+            padding: 6px 12px;
             cursor: pointer;
+            border-radius: 4px;
             transition: all 0.2s;
-            box-shadow: 0 0 10px rgba(0,255,136,0.5);
         }
 
-        #curvatureSlider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 0 15px rgba(0,255,136,0.8);
-        }
-
-        button {
-            background: #00ff88;
-            color: #1a1a1a;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        button:hover {
-            background: #00cc6f;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,255,136,0.4);
-        }
-
-        .reset-btn {
-            background: #333;
-            color: #00ff88;
-            border: 1px solid #00ff88;
-            padding: 8px 15px;
-            font-size: 12px;
-        }
-
-        .reset-btn:hover {
-            background: #444;
-            color: #00ff88;
-            box-shadow: 0 5px 15px rgba(0,255,136,0.2);
-        }
-
-        .title {
-            text-align: center;
-            color: #00ff88;
-            font-size: 24px;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        input[type="radio"]:checked + label {
+            background: #0078d4;
+            color: white;
         }
 
         .slider-container {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 15px;
+            margin: 0 15px;
         }
 
-        .slider-label {
+        input[type="range"] {
+            width: 200px;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #333;
+            border-radius: 3px;
+            margin: 0 10px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #0078d4;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        button {
+            background: #0078d4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
             font-size: 14px;
-            color: #00ff88;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #006cbd;
+        }
+
+        button.secondary {
+            background: #333;
+        }
+
+        button.secondary:hover {
+            background: #444;
         }
     </style>
 </head>
 <body>
-    <h1 class="title">Single Line Editer</h1>
-
     <div class="controls">
         <div class="radio-group">
-            <label class="radio-label" for="dotMode">
-                <input type="radio" name="mode" id="dotMode" checked>
-                Add Dots
-            </label>
+            <input type="radio" name="mode" id="dotMode" checked>
+            <label for="dotMode">Add Dots</label>
             
-            <label class="radio-label" for="edgeMode">
-                <input type="radio" name="mode" id="edgeMode">
-                Add Edges
-            </label>
+            <input type="radio" name="mode" id="edgeMode">
+            <label for="edgeMode">Add Edges</label>
         </div>
-    </div>
 
-    <div class="controls">
         <div class="slider-container">
-            <span class="slider-label">Edge Curvature:</span>
+            <label for="curvatureSlider">Edge Curvature:</label>
             <input type="range" id="curvatureSlider" min="-100" max="100" value="0">
-            <button class="reset-btn" onclick="resetCurvature()">Reset</button>
+            <button class="secondary" onclick="resetCurvature()">Reset</button>
         </div>
     </div>
 
     <div class="container">
-        <canvas id="canvas" width="800" height="800"></canvas>
+        <canvas id="canvas"></canvas>
     </div>
     
     <div class="controls">
@@ -193,30 +146,61 @@
         let isDragging = false;
         let selectedEdge = null;
 
-        function resetCurvature() {
-            document.getElementById('curvatureSlider').value = 0;
-        }
+        // Set up high DPI canvas
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+
+        const scale = 2;
 
         function drawGrid() {
-            ctx.strokeStyle = '#333333';
+            // Draw major grid lines
+            ctx.strokeStyle = '#363636';
             ctx.lineWidth = 0.5;
             
-            for(let x = 0; x <= 800; x += 20) {
+            for(let x = 0; x <= 400; x += 10) {
                 ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, 800);
+                ctx.moveTo(x * scale, 0);
+                ctx.lineTo(x * scale, 800);
                 ctx.stroke();
             }
             
-            for(let y = 0; y <= 800; y += 20) {
+            for(let y = 0; y <= 400; y += 10) {
+                ctx.beginPath(); 
+                ctx.moveTo(0, y * scale);
+                ctx.lineTo(800, y * scale);
+                ctx.stroke();
+            }
+
+            // Draw minor grid lines
+            ctx.strokeStyle = '#2d2d2d';
+            ctx.lineWidth = 0.2;
+            
+            for(let x = 0; x <= 400; x += 2) {
                 ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(800, y);
+                ctx.moveTo(x * scale, 0);
+                ctx.lineTo(x * scale, 800);
                 ctx.stroke();
             }
             
-            ctx.strokeStyle = '#00ff88';
+            for(let y = 0; y <= 400; y += 2) {
+                ctx.beginPath();
+                ctx.moveTo(0, y * scale);
+                ctx.lineTo(800, y * scale);
+                ctx.stroke();
+            }
+            
+            ctx.strokeStyle = '#0078d4';
             ctx.lineWidth = 2;
+        }
+
+        // Rest of the JavaScript remains exactly the same
+        function resetCurvature() {
+            document.getElementById('curvatureSlider').value = 0;
+            draw();
         }
 
         canvas.addEventListener('mousedown', handleMouseDown);
@@ -225,12 +209,14 @@
 
         function handleMouseDown(e) {
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const x = ((e.clientX - rect.left) / scale) * (400/400);
+            const y = ((e.clientY - rect.top) / scale) * (400/400);
             
             if(document.getElementById('dotMode').checked) {
-                if(x >= 0 && x <= 800 && y >= 0 && y <= 800) {
-                    dots.push({x, y});
+                if(x >= 0 && x <= 400 && y >= 0 && y <= 400) {
+                    const roundedX = Math.round(x / 2) * 2;
+                    const roundedY = Math.round(y / 2) * 2;
+                    dots.push({x: roundedX, y: roundedY});
                 }
             } else {
                 selectedDot = findNearestDot(x, y);
@@ -245,8 +231,8 @@
             if(!isDragging) return;
             
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const x = ((e.clientX - rect.left) / scale) * (400/400);
+            const y = ((e.clientY - rect.top) / scale) * (400/400);
             
             tempEdge = {
                 start: selectedDot,
@@ -261,8 +247,8 @@
             if(!isDragging) return;
             
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const x = ((e.clientX - rect.left) / scale) * (400/400);
+            const y = ((e.clientY - rect.top) / scale) * (400/400);
             
             const endDot = findNearestDot(x, y);
             if(endDot !== null && endDot !== selectedDot) {
@@ -290,13 +276,16 @@
         }
 
         function draw() {
-            ctx.clearRect(0, 0, 800, 800);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.save();
+            ctx.scale(scale, scale);
             
             drawGrid();
             
-            ctx.strokeStyle = '#00ff88';
+            // Draw edges
+            ctx.strokeStyle = '#0078d4';
             ctx.lineWidth = 2;
-            
             edges.forEach(edge => drawEdge(edge));
             
             if(tempEdge) {
@@ -324,25 +313,24 @@
                 ctx.stroke();
             }
             
-            ctx.fillStyle = '#00ff88';
-            ctx.strokeStyle = '#00ff88';
-            
+            // Draw dots
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#0078d4';
+            ctx.lineWidth = 2;
             dots.forEach((dot, i) => {
                 ctx.beginPath();
-                ctx.arc(dot.x, dot.y, 6, 0, Math.PI * 2);
+                ctx.arc(dot.x, dot.y, 5, 0, Math.PI * 2);
                 ctx.fill();
-                
-                ctx.shadowColor = '#00ff88';
-                ctx.shadowBlur = 10;
-                ctx.arc(dot.x, dot.y, 6, 0, Math.PI * 2);
                 ctx.stroke();
-                ctx.shadowBlur = 0;
                 
                 ctx.fillStyle = '#fff';
-                ctx.font = '12px Arial';
-                ctx.fillText(i, dot.x + 10, dot.y);
-                ctx.fillStyle = '#00ff88';
+                ctx.font = '12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(i.toString(), dot.x, dot.y + 15);
             });
+            
+            ctx.restore();
         }
 
         function drawEdge(edge) {
