@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Single Line Editer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            margin: 0;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            position: relative;
+            width: 800px;
+            height: 800px;
+            margin: 20px auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        canvas {
+            background: #2a2a2a;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .controls {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            margin: 15px auto;
+            max-width: 800px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+            border: 1px solid #333;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 20px;
+            background: #333;
+            border-radius: 25px;
+            transition: all 0.3s;
+            user-select: none;
+        }
+
+        .radio-label:hover {
+            background: #444;
+            transform: translateY(-2px);
+        }
+
+        input[type="radio"] {
+            margin-right: 8px;
+            accent-color: #00ff88;
+        }
+
+        #curvatureSlider {
+            width: 200px;
+            -webkit-appearance: none;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            outline: none;
+        }
+
+        #curvatureSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #00ff88;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 0 10px rgba(0,255,136,0.5);
+        }
+
+        #curvatureSlider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(0,255,136,0.8);
+        }
+
+        button {
+            background: #00ff88;
+            color: #1a1a1a;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: #00cc6f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,255,136,0.4);
+        }
+
+        .reset-btn {
+            background: #333;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+
+        .reset-btn:hover {
+            background: #444;
+            color: #00ff88;
+            box-shadow: 0 5px 15px rgba(0,255,136,0.2);
+        }
+
+        .title {
+            text-align: center;
+            color: #00ff88;
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .slider-label {
+            font-size: 14px;
+            color: #00ff88;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">Single Line Editer</h1>
+
+    <div class="controls">
+        <div class="radio-group">
+            <label class="radio-label" for="dotMode">
+                <input type="radio" name="mode" id="dotMode" checked>
+                Add Dots
+            </label>
+            
+            <label class="radio-label" for="edgeMode">
+                <input type="radio" name="mode" id="edgeMode">
+                Add Edges
+            </label>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="slider-container">
+            <span class="slider-label">Edge Curvature:</span>
+            <input type="range" id="curvatureSlider" min="-100" max="100" value="0">
+            <button class="reset-btn" onclick="resetCurvature()">Reset</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <canvas id="canvas" width="800" height="800"></canvas>
+    </div>
+    
+    <div class="controls">
+        <button onclick="exportGraph()">Export to Clipboard</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const dots = [];
+        const edges = [];
+        let selectedDot = null;
+        let tempEdge = null;
+        let isDragging = false;
+        let selectedEdge = null;
+
+        function resetCurvature() {
+            document.getElementById('curvatureSlider').value = 0;
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = '#333333';
+            ctx.lineWidth = 0.5;
+            
+            for(let x = 0; x <= 800; x += 20) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 800);
+                ctx.stroke();
+            }
+            
+            for(let y = 0; y <= 800; y += 20) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(800, y);
+                ctx.stroke();
+            }
+            
+            ctx.strokeStyle = '#00ff88';
+            ctx.lineWidth = 2;
+        }
+
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mouseup', handleMouseUp);
+
+        function handleMouseDown(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if(document.getElementById('dotMode').checked) {
+                if(x >= 0 && x <= 800 && y >= 0 && y <= 800) {
+                    dots.push({x, y});
+                }
+            } else {
+                selectedDot = findNearestDot(x, y);
+                if(selectedDot !== null) {
+                    isDragging = true;
+                }
+            }
+            draw();
+        }
+
+        function handleMouseMove(e) {
+            if(!isDragging) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            tempEdge = {
+                start: selectedDot,
+                end: {x, y},
+                curvature: parseInt(document.getElementById('curvatureSlider').value)
+            };
+            
+            draw();
+        }
+
+        function handleMouseUp(e) {
+            if(!isDragging) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const endDot = findNearestDot(x, y);
+            if(endDot !== null && endDot !== selectedDot) {
+                edges.push({
+                    start: selectedDot,
+                    end: endDot,
+                    curvature: parseInt(document.getElementById('curvatureSlider').value)
+                });
+            }
+            
+            isDragging = false;
+            tempEdge = null;
+            draw();
+        }
+
+        function findNearestDot(x, y) {
+            for(let i = 0; i < dots.length; i++) {
+                const dx = dots[i].x - x;
+                const dy = dots[i].y - y;
+                if(Math.sqrt(dx*dx + dy*dy) < 10) {
+                    return i;
+                }
+            }
+            return null;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, 800, 800);
+            
+            drawGrid();
+            
+            ctx.strokeStyle = '#00ff88';
+            ctx.lineWidth = 2;
+            
+            edges.forEach(edge => drawEdge(edge));
+            
+            if(tempEdge) {
+                ctx.beginPath();
+                ctx.moveTo(dots[tempEdge.start].x, dots[tempEdge.start].y);
+                
+                if(tempEdge.curvature !== 0) {
+                    const midX = (dots[tempEdge.start].x + tempEdge.end.x) / 2;
+                    const midY = (dots[tempEdge.start].y + tempEdge.end.y) / 2;
+                    const normal = {
+                        x: -(tempEdge.end.y - dots[tempEdge.start].y),
+                        y: tempEdge.end.x - dots[tempEdge.start].x
+                    };
+                    const len = Math.sqrt(normal.x*normal.x + normal.y*normal.y);
+                    const controlPoint = {
+                        x: midX + normal.x/len * tempEdge.curvature,
+                        y: midY + normal.y/len * tempEdge.curvature
+                    };
+                    
+                    ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, tempEdge.end.x, tempEdge.end.y);
+                } else {
+                    ctx.lineTo(tempEdge.end.x, tempEdge.end.y);
+                }
+                
+                ctx.stroke();
+            }
+            
+            ctx.fillStyle = '#00ff88';
+            ctx.strokeStyle = '#00ff88';
+            
+            dots.forEach((dot, i) => {
+                ctx.beginPath();
+                ctx.arc(dot.x, dot.y, 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.shadowColor = '#00ff88';
+                ctx.shadowBlur = 10;
+                ctx.arc(dot.x, dot.y, 6, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Arial';
+                ctx.fillText(i, dot.x + 10, dot.y);
+                ctx.fillStyle = '#00ff88';
+            });
+        }
+
+        function drawEdge(edge) {
+            ctx.beginPath();
+            ctx.moveTo(dots[edge.start].x, dots[edge.start].y);
+            
+            if(edge.curvature !== 0) {
+                const midX = (dots[edge.start].x + dots[edge.end].x) / 2;
+                const midY = (dots[edge.start].y + dots[edge.end].y) / 2;
+                const normal = {
+                    x: -(dots[edge.end].y - dots[edge.start].y),
+                    y: dots[edge.end].x - dots[edge.start].x
+                };
+                const len = Math.sqrt(normal.x*normal.x + normal.y*normal.y);
+                const controlPoint = {
+                    x: midX + normal.x/len * edge.curvature,
+                    y: midY + normal.y/len * edge.curvature
+                };
+                
+                ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, dots[edge.end].x, dots[edge.end].y);
+            } else {
+                ctx.lineTo(dots[edge.end].x, dots[edge.end].y);
+            }
+            
+            ctx.stroke();
+        }
+
+        function exportGraph() {
+            let output = 'final List<Offset> dots = [\n';
+            dots.forEach(dot => {
+                output += `  const Offset(${dot.x}, ${dot.y}),\n`;
+            });
+            output += '];\n\n';
+
+            output += 'final List<Edge> edges = [\n';
+            edges.forEach(edge => {
+                if(edge.curvature !== 0) {
+                    const midX = (dots[edge.start].x + dots[edge.end].x) / 2;
+                    const midY = (dots[edge.start].y + dots[edge.end].y) / 2;
+                    const normal = {
+                        x: -(dots[edge.end].y - dots[edge.start].y),
+                        y: dots[edge.end].x - dots[edge.start].x
+                    };
+                    const len = Math.sqrt(normal.x*normal.x + normal.y*normal.y);
+                    const controlPoint = {
+                        x: midX + normal.x/len * edge.curvature,
+                        y: midY + normal.y/len * edge.curvature
+                    };
+                    
+                    output += `  Edge(${edge.start}, ${edge.end}, isCurved: true, controlPoint: const Offset(${controlPoint.x}, ${controlPoint.y})),\n`;
+                } else {
+                    output += `  Edge(${edge.start}, ${edge.end}),\n`;
+                }
+            });
+            output += '];';
+
+            navigator.clipboard.writeText(output);
+            alert('Exported to clipboard!');
+        }
+
+        draw();
+    </script>
+</body>
+</html>
