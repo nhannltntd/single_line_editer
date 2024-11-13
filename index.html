@@ -5,237 +5,286 @@
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.0/dist/sweetalert2.min.css">
       <style>
          :root {
-         --primary: #0078d4;
-         --primary-dark: #006cbd;
-         --bg-dark: #1e1e1e;
-         --bg-darker: #161616;
-         --surface: #252526;
-         --surface-hover: #2d2d2d;
-         --text: #ffffff;
+             --primary: #0078d4;
+             --primary-dark: #006cbd;
+             --bg-dark: #1e1e1e;
+             --bg-darker: #161616;
+             --surface: #252526;
+             --surface-hover: #2d2d2d;
+             --text: #ffffff;
          }
          body {
-         background: var(--bg-dark);
-         color: var(--text);
-         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-         margin: 0;
-         padding: 20px;
-         min-height: 100vh;
+             background: var(--bg-dark);
+             color: var(--text);
+             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+             margin: 0;
+             padding: 20px;
+             min-height: 100vh;
          }
          .swal2-popup {
-         background: rgba(50, 50, 50, 0.95) !important;
-         backdrop-filter: blur(10px) !important;
-         border: 1px solid rgba(255, 255, 255, 0.1) !important;
-         border-radius: 12px !important;
-         color: #ffffff !important;
+             background: rgba(50, 50, 50, 0.95) !important;
+             backdrop-filter: blur(10px) !important;
+             border: 1px solid rgba(255, 255, 255, 0.1) !important;
+             border-radius: 12px !important;
+             color: #ffffff !important;
          }
          .swal2-title {
-         color: #ffffff !important;
-         font-size: 18px !important;
-         font-weight: 500 !important;
+             color: #ffffff !important;
+             font-size: 18px !important;
+             font-weight: 500 !important;
          }
          .swal2-input {
-         background: rgba(255, 255, 255, 0.1) !important;
-         border: 1px solid rgba(255, 255, 255, 0.2) !important;
-         color: #ffffff !important;
-         border-radius: 8px !important;
-         padding: 12px !important;
-         margin-top: 20px !important;
+             background: rgba(255, 255, 255, 0.1) !important;
+             border: 1px solid rgba(255, 255, 255, 0.2) !important;
+             color: #ffffff !important;
+             border-radius: 8px !important;
+             padding: 12px !important;
+             margin-top: 20px !important;
          }
          .swal2-input:focus {
-         border-color: var(--primary) !important;
-         box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3) !important;
+             border-color: var(--primary) !important;
+             box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3) !important;
          }
          .swal2-confirm {
-         background: var(--primary) !important;
-         border-radius: 8px !important;
-         padding: 12px 24px !important;
+             background: var(--primary) !important;
+             border-radius: 8px !important;
+             padding: 12px 24px !important;
          }
          .swal2-cancel {
-         background: rgba(255, 255, 255, 0.1) !important;
-         border-radius: 8px !important;
-         padding: 12px 24px !important;
+             background: rgba(255, 255, 255, 0.1) !important;
+             border-radius: 8px !important;
+             padding: 12px 24px !important;
          }
          .swal2-actions {
-         margin-top: 25px !important;
+             margin-top: 25px !important;
          }
          .container {
-         position: relative;
-         width: 800px;
-         height: 800px;
-         margin: 20px auto;
-         border-radius: 12px;
-         overflow: hidden;
-         box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-         border: 1px solid rgba(255,255,255,0.1);
-         transition: transform 0.3s ease, box-shadow 0.3s ease;
+             position: relative;
+             width: 800px;
+             height: 800px;
+             margin: 20px auto;
+             border-radius: 12px;
+             overflow: hidden;
+             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+             border: 1px solid rgba(255,255,255,0.1);
+             transition: transform 0.3s ease, box-shadow 0.3s ease;
          }
          .container:hover {
-         transform: translateY(-2px);
-         box-shadow: 0 12px 48px rgba(0,0,0,0.4);
+             transform: translateY(-2px);
+             box-shadow: 0 12px 48px rgba(0,0,0,0.4);
          }
          canvas {
-         background: var(--bg-darker);
-         position: absolute;
-         top: 0;
-         left: 0;
-         width: 800px;
-         height: 800px;
-         transition: filter 0.3s ease;
+             background: transparent; /* Changed from var(--bg-darker) to transparent */
+             position: absolute;
+             top: 0;
+             left: 0;
+             width: 800px;
+             height: 800px;
+             transition: filter 0.3s ease;
+             z-index: 2; /* Ensures canvas is above imageLayer by default */
          }
          canvas:hover {
-         filter: brightness(1.1);
+             filter: brightness(1.1);
          }
+         #imageLayer {
+             position: absolute;
+             top: 0;
+             left: 0;
+             width: 800px;
+             height: 800px;
+             opacity: 0.5;
+             pointer-events: none;
+             z-index: 1; /* Ensures imageLayer is below canvas by default */
+             transition: transform 0.3s ease, z-index 0.3s ease;
+         }
+
+         #imageLayer.interactive {
+             pointer-events: all;
+             cursor: move;
+             z-index: 3; /* Moves imageLayer above canvas when interactive */
+         }
+
          .controls {
-         margin: 15px auto;
-         text-align: center;
-         background: var(--surface);
-         padding: 20px;
-         border-radius: 12px;
-         box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-         max-width: 800px;
-         border: 1px solid rgba(255,255,255,0.05);
-         backdrop-filter: blur(12px);
+             margin: 15px auto;
+             text-align: center;
+             background: var(--surface);
+             padding: 20px;
+             border-radius: 12px;
+             box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+             max-width: 800px;
+             border: 1px solid rgba(255,255,255,0.05);
+             backdrop-filter: blur(12px);
          }
          .radio-group {
-         display: inline-flex;
-         background: rgba(0,0,0,0.2);
-         border-radius: 8px;
-         padding: 4px;
-         margin: 0 10px;
-         border: 1px solid rgba(255,255,255,0.1);
+             display: inline-flex;
+             background: rgba(0,0,0,0.2);
+             border-radius: 8px;
+             padding: 4px;
+             margin: 0 10px;
+             border: 1px solid rgba(255,255,255,0.1);
          }
          input[type="radio"] {
-         display: none;
+             display: none;
          }
          input[type="radio"] + label {
-         padding: 8px 16px;
-         cursor: pointer;
-         border-radius: 6px;
-         transition: all 0.3s ease;
-         font-weight: 500;
-         position: relative;
-         overflow: hidden;
+             padding: 8px 16px;
+             cursor: pointer;
+             border-radius: 6px;
+             transition: all 0.3s ease;
+             font-weight: 500;
+             position: relative;
+             overflow: hidden;
          }
          input[type="radio"] + label:hover {
-         background: rgba(255,255,255,0.1);
+             background: rgba(255,255,255,0.1);
          }
          input[type="radio"]:checked + label {
-         background: var(--primary);
-         color: white;
-         box-shadow: 0 2px 8px rgba(0,120,212,0.4);
+             background: var(--primary);
+             color: white;
+             box-shadow: 0 2px 8px rgba(0,120,212,0.4);
          }
          input[type="radio"]:checked + label:before {
-         content: '';
-         position: absolute;
-         top: 0;
-         left: 0;
-         right: 0;
-         bottom: 0;
-         background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
-         animation: glow 2s infinite;
+             content: '';
+             position: absolute;
+             top: 0;
+             left: 0;
+             right: 0;
+             bottom: 0;
+             background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
+             animation: glow 2s infinite;
          }
          @keyframes glow {
-         0%, 100% { opacity: 0.5; }
-         50% { opacity: 1; }
+             0%, 100% { opacity: 0.5; }
+             50% { opacity: 1; }
          }
          .slider-container {
-         display: inline-flex;
-         align-items: center;
-         margin: 0 15px;
-         background: rgba(0,0,0,0.2);
-         padding: 8px 16px;
-         border-radius: 8px;
-         border: 1px solid rgba(255,255,255,0.1);
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             margin: 20px 0;
+             background: rgba(0,0,0,0.2);
+             padding: 16px;
+             border-radius: 8px;
+             border: 1px solid rgba(255,255,255,0.1);
+             flex-wrap: wrap;
+             gap: 10px;
+         }
+         .slider-container label {
+             margin-right: 10px;
+             min-width: 120px;
+             text-align: right;
          }
          input[type="range"] {
-         width: 200px;
-         height: 6px;
-         -webkit-appearance: none;
-         background: rgba(255,255,255,0.1);
-         border-radius: 3px;
-         margin: 0 10px;
-         transition: background 0.3s ease;
+             width: 400px; /* Increased width for longer slider */
+             height: 6px;
+             -webkit-appearance: none;
+             background: rgba(255,255,255,0.1);
+             border-radius: 3px;
+             margin: 0 10px;
+             transition: background 0.3s ease;
          }
          input[type="range"]:hover {
-         background: rgba(255,255,255,0.2);
+             background: rgba(255,255,255,0.2);
          }
          input[type="range"]::-webkit-slider-thumb {
-         -webkit-appearance: none;
-         width: 18px;
-         height: 18px;
-         background: var(--primary);
-         border-radius: 50%;
-         cursor: pointer;
-         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-         transition: transform 0.3s ease, box-shadow 0.3s ease;
+             -webkit-appearance: none;
+             width: 18px;
+             height: 18px;
+             background: var(--primary);
+             border-radius: 50%;
+             cursor: pointer;
+             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+             transition: transform 0.3s ease, box-shadow 0.3s ease;
          }
          input[type="range"]::-webkit-slider-thumb:hover {
-         transform: scale(1.2);
-         box-shadow: 0 4px 12px rgba(0,120,212,0.5);
+             transform: scale(1.2);
+             box-shadow: 0 4px 12px rgba(0,120,212,0.5);
+         }
+         .number-input {
+             width: 60px;
+             padding: 8px;
+             border: 1px solid rgba(255,255,255,0.2);
+             border-radius: 6px;
+             background: rgba(255,255,255,0.1);
+             color: #ffffff;
+             text-align: center;
+             font-size: 14px;
+             transition: border-color 0.3s ease, box-shadow 0.3s ease;
+         }
+         .number-input:focus {
+             border-color: var(--primary);
+             box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3);
+             outline: none;
          }
          button {
-         background: var(--primary);
-         color: white;
-         border: none;
-         padding: 10px 20px;
-         border-radius: 8px;
-         cursor: pointer;
-         font-size: 14px;
-         font-weight: 500;
-         transition: all 0.3s ease;
-         position: relative;
-         overflow: hidden;
-         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+             background: var(--primary);
+             color: white;
+             border: none;
+             padding: 10px 20px;
+             border-radius: 8px;
+             cursor: pointer;
+             font-size: 14px;
+             font-weight: 500;
+             transition: all 0.3s ease;
+             position: relative;
+             overflow: hidden;
+             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
          }
          button:hover {
-         background: var(--primary-dark);
-         transform: translateY(-2px);
-         box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+             background: var(--primary-dark);
+             transform: translateY(-2px);
+             box-shadow: 0 6px 16px rgba(0,0,0,0.3);
          }
          button:active {
-         transform: translateY(0);
+             transform: translateY(0);
          }
          button:before {
-         content: '';
-         position: absolute;
-         top: 0;
-         left: 0;
-         right: 0;
-         bottom: 0;
-         background: linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
-         transform: translateX(-100%);
-         transition: transform 0.6s ease;
+             content: '';
+             position: absolute;
+             top: 0;
+             left: 0;
+             right: 0;
+             bottom: 0;
+             background: linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+             transform: translateX(-100%);
+             transition: transform 0.6s ease;
          }
          button:hover:before {
-         transform: translateX(100%);
+             transform: translateX(100%);
          }
          button.secondary {
-         background: rgba(255,255,255,0.1);
+             background: rgba(255,255,255,0.1);
          }
          button.secondary:hover {
-         background: rgba(255,255,255,0.15);
+             background: rgba(255,255,255,0.15);
          }
       </style>
    </head>
    <body>
       <div class="controls">
-         <div class="radio-group">
-            <input type="radio" name="mode" id="dotMode" checked>
-            <label for="dotMode">Add Dots</label>
-            <input type="radio" name="mode" id="edgeMode">
-            <label for="edgeMode">Add Edges</label>
-         </div>
-         <div class="slider-container">
-            <label for="curvatureSlider">Edge Curvature:</label>
-            <input type="range" id="curvatureSlider" min="-100" max="100" value="0">
-            <button class="secondary" onclick="resetCurvature()">Reset</button>
-         </div>
+          <div class="radio-group">
+              <input type="radio" name="mode" id="dotMode" checked>
+              <label for="dotMode">Add Dots</label>
+              <input type="radio" name="mode" id="edgeMode">
+              <label for="edgeMode">Add Edges</label>
+          </div>
+          <div class="slider-container">
+              <label for="curvatureSlider">Edge Curvature:</label>
+              <input type="range" id="curvatureSlider" min="-300" max="300" value="0" step="1"> <!-- Updated min and max -->
+              <input type="number" id="curvatureInput" class="number-input" min="-300" max="300" value="0"> <!-- Updated min and max -->
+              <button class="secondary" onclick="resetCurvature()">Reset</button>
+              <!-- Removed the tick marks and labels -->
+          </div>
+          <input type="file" id="imageInput" accept="image/*" style="display: none">
+          <button onclick="document.getElementById('imageInput').click()">Upload Image</button>
+          <button onclick="toggleImageInteraction()" id="toggleBtn">Enable Image Interaction</button>
       </div>
       <div class="container">
-         <canvas id="canvas"></canvas>
+          <img id="imageLayer" style="display:none"> <!-- Moved above the canvas -->
+          <canvas id="canvas"></canvas>
       </div>
       <div class="controls">
-         <button onclick="exportGraph()">Export</button>
+          <button onclick="exportGraph()">Export</button>
       </div>
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.0/dist/sweetalert2.all.min.js"></script>
       <script>
@@ -247,7 +296,84 @@
          let tempEdge = null;
          let isDragging = false;
          let selectedEdge = null;
-         
+         let imageInteractive = false;
+         let isDraggingImage = false;
+         let lastX = 0;
+         let lastY = 0;
+         let imageScale = 1;
+         let imageX = 0;
+         let imageY = 0;
+
+         const imageLayer = document.getElementById('imageLayer');
+         const imageInput = document.getElementById('imageInput');
+         const toggleBtn = document.getElementById('toggleBtn');
+         const container = document.querySelector('.container');
+         const curvatureSlider = document.getElementById('curvatureSlider');
+         const curvatureInput = document.getElementById('curvatureInput');
+
+         imageInput.addEventListener('change', function(e) {
+             const file = e.target.files[0];
+             if (file) {
+                 const reader = new FileReader();
+                 reader.onload = function(event) {
+                     imageLayer.src = event.target.result;
+                     imageLayer.style.display = 'block';
+                     imageX = 0;
+                     imageY = 0;
+                     imageScale = 1;
+                     updateImageTransform();
+                 };
+                 reader.readAsDataURL(file);
+             }
+         });
+
+         function toggleImageInteraction() {
+             imageInteractive = !imageInteractive;
+             imageLayer.classList.toggle('interactive');
+             toggleBtn.textContent = imageInteractive ? 'Disable Image Interaction' : 'Enable Image Interaction';
+
+             if (imageInteractive) {
+                 // Optionally disable canvas pointer events to prevent interference
+                 canvas.style.pointerEvents = 'none';
+             } else {
+                 canvas.style.pointerEvents = 'auto';
+             }
+         }
+
+         imageLayer.addEventListener('mousedown', function(e) {
+             if (!imageInteractive) return;
+             isDraggingImage = true;
+             lastX = e.clientX;
+             lastY = e.clientY;
+         });
+
+         document.addEventListener('mousemove', function(e) {
+             if (!isDraggingImage) return;
+             const deltaX = e.clientX - lastX;
+             const deltaY = e.clientY - lastY;
+             imageX += deltaX;
+             imageY += deltaY;
+             lastX = e.clientX;
+             lastY = e.clientY;
+             updateImageTransform();
+         });
+
+         document.addEventListener('mouseup', function() {
+             isDraggingImage = false;
+         });
+
+         imageLayer.addEventListener('wheel', function(e) {
+             if (!imageInteractive) return;
+             e.preventDefault();
+             const scala = e.deltaY > 0 ? 0.9 : 1.1;
+             imageScale *= scala;
+             imageScale = Math.max(0.1, Math.min(5, imageScale));
+             updateImageTransform();
+         }, { passive: false });
+
+         function updateImageTransform() {
+             imageLayer.style.transform = `translate(${imageX}px, ${imageY}px) scale(${imageScale})`;
+         }
          const dpr = window.devicePixelRatio || 1;
          const rect = canvas.getBoundingClientRect();
          
@@ -297,9 +423,25 @@
          }
          
          function resetCurvature() {
-             document.getElementById('curvatureSlider').value = 0;
+             curvatureSlider.value = 0;
+             curvatureInput.value = 0;
              draw();
          }
+         
+         // Synchronize slider and input box
+         curvatureSlider.addEventListener('input', function() {
+             curvatureInput.value = curvatureSlider.value;
+             draw();
+         });
+
+         curvatureInput.addEventListener('input', function() {
+             let val = parseInt(curvatureInput.value);
+             if (isNaN(val)) val = 0;
+             val = Math.max(-300, Math.min(300, val)); // Updated range
+             curvatureInput.value = val;
+             curvatureSlider.value = val;
+             draw();
+         });
          
          canvas.addEventListener('mousedown', handleMouseDown);
          canvas.addEventListener('mousemove', handleMouseMove);
@@ -335,7 +477,7 @@
              tempEdge = {
                  start: selectedDot,
                  end: {x, y},
-                 curvature: parseInt(document.getElementById('curvatureSlider').value)
+                 curvature: parseInt(curvatureSlider.value)
              };
              
              draw();
@@ -353,7 +495,7 @@
                  edges.push({
                      start: selectedDot,
                      end: endDot,
-                     curvature: parseInt(document.getElementById('curvatureSlider').value)
+                     curvature: parseInt(curvatureSlider.value)
                  });
              }
              
@@ -445,10 +587,10 @@
                      x: -(dots[edge.end].y - dots[edge.start].y),
                      y: dots[edge.end].x - dots[edge.start].x
                  };
-                 const len = Math.sqrt(normal.x*normal.x + normal.y*normal.y);
+                 const len = Math.sqrt(normal.x * normal.x + normal.y * normal.y);
                  const controlPoint = {
-                     x: midX + normal.x/len * edge.curvature,
-                     y: midY + normal.y/len * edge.curvature
+                     x: midX + normal.x / len * edge.curvature,
+                     y: midY + normal.y / len * edge.curvature
                  };
                  
                  ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, dots[edge.end].x, dots[edge.end].y);
@@ -460,64 +602,64 @@
          }
          
          function exportGraph() {
-         const data = {
-         dots: dots.map(dot => ({ x: dot.x, y: dot.y })),
-         edges: edges.map(edge => {
-             const edgeData = {
-                 startIndex: edge.start,
-                 endIndex: edge.end
+             const data = {
+                 dots: dots.map(dot => ({ x: dot.x, y: dot.y })),
+                 edges: edges.map(edge => {
+                     const edgeData = {
+                         startIndex: edge.start,
+                         endIndex: edge.end
+                     };
+                     if (edge.curvature !== 0) {
+                         const midX = (dots[edge.start].x + dots[edge.end].x) / 2;
+                         const midY = (dots[edge.start].y + dots[edge.end].y) / 2;
+                         const normal = {
+                             x: -(dots[edge.end].y - dots[edge.start].y),
+                             y: dots[edge.end].x - dots[edge.start].x
+                         };
+                         const len = Math.sqrt(normal.x * normal.x + normal.y * normal.y);
+                         edgeData.controlPoint = {
+                             x: midX + (normal.x / len) * edge.curvature,
+                             y: midY + (normal.y / len) * edge.curvature
+                         };
+                     }
+                     return edgeData;
+                 })
              };
-             if (edge.curvature !== 0) {
-                 const midX = (dots[edge.start].x + dots[edge.end].x) / 2;
-                 const midY = (dots[edge.start].y + dots[edge.end].y) / 2;
-                 const normal = {
-                     x: -(dots[edge.end].y - dots[edge.start].y),
-                     y: dots[edge.end].x - dots[edge.start].x
-                 };
-                 const len = Math.sqrt(normal.x * normal.x + normal.y * normal.y);
-                 edgeData.controlPoint = {
-                     x: midX + (normal.x / len) * edge.curvature,
-                     y: midY + (normal.y / len) * edge.curvature
-                 };
-             }
-             return edgeData;
-         })
-         };
-         
-         const jsonString = JSON.stringify(data, null, 2);
-         
-         const now = new Date();
-         const defaultFileName = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
-         
-         Swal.fire({
-         title: 'Save File',
-         html: '<div style="text-align: left; margin-bottom: 10px;">Where would you like to save the file?</div>',
-         input: 'text',
-         inputValue: defaultFileName,
-         inputPlaceholder: 'Enter filename',
-         showCancelButton: true,
-         confirmButtonText: 'Save',
-         cancelButtonText: 'Cancel',
-         customClass: {
-             container: 'save-dialog-container'
-         },
-         inputValidator: (value) => {
-             if (!value) {
-                 return 'Please enter a filename';
-             }
-         }
-         }).then((result) => {
-         if (result.isConfirmed) {
-             const blob = new Blob([jsonString], { type: "application/json" });
-             const link = document.createElement("a");
-             link.href = URL.createObjectURL(blob);
-             link.download = `${result.value}.json`;
-             link.style.display = "none";
-             document.body.appendChild(link);
-             link.click();
-             document.body.removeChild(link);
-         }
-         });
+             
+             const jsonString = JSON.stringify(data, null, 2);
+             
+             const now = new Date();
+             const defaultFileName = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+             
+             Swal.fire({
+                 title: 'Save File',
+                 html: '<div style="text-align: left; margin-bottom: 10px;">Where would you like to save the file?</div>',
+                 input: 'text',
+                 inputValue: defaultFileName,
+                 inputPlaceholder: 'Enter filename',
+                 showCancelButton: true,
+                 confirmButtonText: 'Save',
+                 cancelButtonText: 'Cancel',
+                 customClass: {
+                     container: 'save-dialog-container'
+                 },
+                 inputValidator: (value) => {
+                     if (!value) {
+                         return 'Please enter a filename';
+                     }
+                 }
+             }).then((result) => {
+                 if (result.isConfirmed) {
+                     const blob = new Blob([jsonString], { type: "application/json" });
+                     const link = document.createElement("a");
+                     link.href = URL.createObjectURL(blob);
+                     link.download = `${result.value}.json`;
+                     link.style.display = "none";
+                     document.body.appendChild(link);
+                     link.click();
+                     document.body.removeChild(link);
+                 }
+             });
          }
          
          draw();
