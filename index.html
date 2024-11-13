@@ -1,509 +1,526 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Single Line Editer</title>
-    <style>
-        :root {
-            --primary: #0078d4;
-            --primary-dark: #006cbd;
-            --bg-dark: #1e1e1e;
-            --bg-darker: #161616;
-            --surface: #252526;
-            --surface-hover: #2d2d2d;
-            --text: #ffffff;
-        }
-
-        body {
-            background: var(--bg-dark);
-            color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-        }
-
-        .container {
-            position: relative;
-            width: 800px;
-            height: 800px;
-            margin: 20px auto;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .container:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 48px rgba(0,0,0,0.4);
-        }
-
-        canvas {
-            background: var(--bg-darker);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 800px;
-            height: 800px;
-            transition: filter 0.3s ease;
-        }
-
-        canvas:hover {
-            filter: brightness(1.1);
-        }
-
-        .controls {
-            margin: 15px auto;
-            text-align: center;
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-            max-width: 800px;
-            border: 1px solid rgba(255,255,255,0.05);
-            backdrop-filter: blur(12px);
-        }
-
-        .radio-group {
-            display: inline-flex;
-            background: rgba(0,0,0,0.2);
-            border-radius: 8px;
-            padding: 4px;
-            margin: 0 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        input[type="radio"] {
-            display: none;
-        }
-
-        input[type="radio"] + label {
-            padding: 8px 16px;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            position: relative;
-            overflow: hidden;
-        }
-
-        input[type="radio"] + label:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        input[type="radio"]:checked + label {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 2px 8px rgba(0,120,212,0.4);
-        }
-
-        input[type="radio"]:checked + label:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
-            animation: glow 2s infinite;
-        }
-
-        @keyframes glow {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        .slider-container {
-            display: inline-flex;
-            align-items: center;
-            margin: 0 15px;
-            background: rgba(0,0,0,0.2);
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        input[type="range"] {
-            width: 200px;
-            height: 6px;
-            -webkit-appearance: none;
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            margin: 0 10px;
-            transition: background 0.3s ease;
-        }
-
-        input[type="range"]:hover {
-            background: rgba(255,255,255,0.2);
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: var(--primary);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 4px 12px rgba(0,120,212,0.5);
-        }
-
-        button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        button:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
-            transform: translateX(-100%);
-            transition: transform 0.6s ease;
-        }
-
-        button:hover:before {
-            transform: translateX(100%);
-        }
-
-        button.secondary {
-            background: rgba(255,255,255,0.1);
-        }
-
-        button.secondary:hover {
-            background: rgba(255,255,255,0.15);
-        }
-
-    </style>
-</head>
-<body>
-    <!-- Rest of HTML remains exactly the same -->
-    <div class="controls">
-        <div class="radio-group">
+   <head>
+      <title>Single Line Editor</title>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.0/dist/sweetalert2.min.css">
+      <style>
+         :root {
+         --primary: #0078d4;
+         --primary-dark: #006cbd;
+         --bg-dark: #1e1e1e;
+         --bg-darker: #161616;
+         --surface: #252526;
+         --surface-hover: #2d2d2d;
+         --text: #ffffff;
+         }
+         body {
+         background: var(--bg-dark);
+         color: var(--text);
+         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+         margin: 0;
+         padding: 20px;
+         min-height: 100vh;
+         }
+         .swal2-popup {
+         background: rgba(50, 50, 50, 0.95) !important;
+         backdrop-filter: blur(10px) !important;
+         border: 1px solid rgba(255, 255, 255, 0.1) !important;
+         border-radius: 12px !important;
+         color: #ffffff !important;
+         }
+         .swal2-title {
+         color: #ffffff !important;
+         font-size: 18px !important;
+         font-weight: 500 !important;
+         }
+         .swal2-input {
+         background: rgba(255, 255, 255, 0.1) !important;
+         border: 1px solid rgba(255, 255, 255, 0.2) !important;
+         color: #ffffff !important;
+         border-radius: 8px !important;
+         padding: 12px !important;
+         margin-top: 20px !important;
+         }
+         .swal2-input:focus {
+         border-color: var(--primary) !important;
+         box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3) !important;
+         }
+         .swal2-confirm {
+         background: var(--primary) !important;
+         border-radius: 8px !important;
+         padding: 12px 24px !important;
+         }
+         .swal2-cancel {
+         background: rgba(255, 255, 255, 0.1) !important;
+         border-radius: 8px !important;
+         padding: 12px 24px !important;
+         }
+         .swal2-actions {
+         margin-top: 25px !important;
+         }
+         .container {
+         position: relative;
+         width: 800px;
+         height: 800px;
+         margin: 20px auto;
+         border-radius: 12px;
+         overflow: hidden;
+         box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+         border: 1px solid rgba(255,255,255,0.1);
+         transition: transform 0.3s ease, box-shadow 0.3s ease;
+         }
+         .container:hover {
+         transform: translateY(-2px);
+         box-shadow: 0 12px 48px rgba(0,0,0,0.4);
+         }
+         canvas {
+         background: var(--bg-darker);
+         position: absolute;
+         top: 0;
+         left: 0;
+         width: 800px;
+         height: 800px;
+         transition: filter 0.3s ease;
+         }
+         canvas:hover {
+         filter: brightness(1.1);
+         }
+         .controls {
+         margin: 15px auto;
+         text-align: center;
+         background: var(--surface);
+         padding: 20px;
+         border-radius: 12px;
+         box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+         max-width: 800px;
+         border: 1px solid rgba(255,255,255,0.05);
+         backdrop-filter: blur(12px);
+         }
+         .radio-group {
+         display: inline-flex;
+         background: rgba(0,0,0,0.2);
+         border-radius: 8px;
+         padding: 4px;
+         margin: 0 10px;
+         border: 1px solid rgba(255,255,255,0.1);
+         }
+         input[type="radio"] {
+         display: none;
+         }
+         input[type="radio"] + label {
+         padding: 8px 16px;
+         cursor: pointer;
+         border-radius: 6px;
+         transition: all 0.3s ease;
+         font-weight: 500;
+         position: relative;
+         overflow: hidden;
+         }
+         input[type="radio"] + label:hover {
+         background: rgba(255,255,255,0.1);
+         }
+         input[type="radio"]:checked + label {
+         background: var(--primary);
+         color: white;
+         box-shadow: 0 2px 8px rgba(0,120,212,0.4);
+         }
+         input[type="radio"]:checked + label:before {
+         content: '';
+         position: absolute;
+         top: 0;
+         left: 0;
+         right: 0;
+         bottom: 0;
+         background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
+         animation: glow 2s infinite;
+         }
+         @keyframes glow {
+         0%, 100% { opacity: 0.5; }
+         50% { opacity: 1; }
+         }
+         .slider-container {
+         display: inline-flex;
+         align-items: center;
+         margin: 0 15px;
+         background: rgba(0,0,0,0.2);
+         padding: 8px 16px;
+         border-radius: 8px;
+         border: 1px solid rgba(255,255,255,0.1);
+         }
+         input[type="range"] {
+         width: 200px;
+         height: 6px;
+         -webkit-appearance: none;
+         background: rgba(255,255,255,0.1);
+         border-radius: 3px;
+         margin: 0 10px;
+         transition: background 0.3s ease;
+         }
+         input[type="range"]:hover {
+         background: rgba(255,255,255,0.2);
+         }
+         input[type="range"]::-webkit-slider-thumb {
+         -webkit-appearance: none;
+         width: 18px;
+         height: 18px;
+         background: var(--primary);
+         border-radius: 50%;
+         cursor: pointer;
+         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+         transition: transform 0.3s ease, box-shadow 0.3s ease;
+         }
+         input[type="range"]::-webkit-slider-thumb:hover {
+         transform: scale(1.2);
+         box-shadow: 0 4px 12px rgba(0,120,212,0.5);
+         }
+         button {
+         background: var(--primary);
+         color: white;
+         border: none;
+         padding: 10px 20px;
+         border-radius: 8px;
+         cursor: pointer;
+         font-size: 14px;
+         font-weight: 500;
+         transition: all 0.3s ease;
+         position: relative;
+         overflow: hidden;
+         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+         }
+         button:hover {
+         background: var(--primary-dark);
+         transform: translateY(-2px);
+         box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+         }
+         button:active {
+         transform: translateY(0);
+         }
+         button:before {
+         content: '';
+         position: absolute;
+         top: 0;
+         left: 0;
+         right: 0;
+         bottom: 0;
+         background: linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+         transform: translateX(-100%);
+         transition: transform 0.6s ease;
+         }
+         button:hover:before {
+         transform: translateX(100%);
+         }
+         button.secondary {
+         background: rgba(255,255,255,0.1);
+         }
+         button.secondary:hover {
+         background: rgba(255,255,255,0.15);
+         }
+      </style>
+   </head>
+   <body>
+      <div class="controls">
+         <div class="radio-group">
             <input type="radio" name="mode" id="dotMode" checked>
             <label for="dotMode">Add Dots</label>
-            
             <input type="radio" name="mode" id="edgeMode">
             <label for="edgeMode">Add Edges</label>
-        </div>
-
-        <div class="slider-container">
+         </div>
+         <div class="slider-container">
             <label for="curvatureSlider">Edge Curvature:</label>
             <input type="range" id="curvatureSlider" min="-100" max="100" value="0">
             <button class="secondary" onclick="resetCurvature()">Reset</button>
-        </div>
-    </div>
-
-    <div class="container">
-        <canvas id="canvas"></canvas>
-    </div>
-    
-    <div class="controls">
-        <button onclick="exportGraph()">Export to Clipboard</button>
-    </div>
-
-    <script>
-        // JavaScript code remains exactly the same
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const dots = [];
-        const edges = [];
-        let selectedDot = null;
-        let tempEdge = null;
-        let isDragging = false;
-        let selectedEdge = null;
-
-        // Set up high DPI canvas
-        const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
-        
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
-
-        const scale = 2;
-
-        function drawGrid() {
-            // Draw major grid lines
-            ctx.strokeStyle = '#363636';
-            ctx.lineWidth = 0.5;
-            
-            for(let x = 0; x <= 400; x += 10) {
-                ctx.beginPath();
-                ctx.moveTo(x * scale, 0);
-                ctx.lineTo(x * scale, 800);
-                ctx.stroke();
-            }
-            
-            for(let y = 0; y <= 400; y += 10) {
-                ctx.beginPath(); 
-                ctx.moveTo(0, y * scale);
-                ctx.lineTo(800, y * scale);
-                ctx.stroke();
-            }
-
-            // Draw minor grid lines
-            ctx.strokeStyle = '#2d2d2d';
-            ctx.lineWidth = 0.2;
-            
-            for(let x = 0; x <= 400; x += 2) {
-                ctx.beginPath();
-                ctx.moveTo(x * scale, 0);
-                ctx.lineTo(x * scale, 800);
-                ctx.stroke();
-            }
-            
-            for(let y = 0; y <= 400; y += 2) {
-                ctx.beginPath();
-                ctx.moveTo(0, y * scale);
-                ctx.lineTo(800, y * scale);
-                ctx.stroke();
-            }
-            
-            ctx.strokeStyle = '#0078d4';
-            ctx.lineWidth = 2;
-        }
-
-        function resetCurvature() {
-            document.getElementById('curvatureSlider').value = 0;
-            draw();
-        }
-
-        canvas.addEventListener('mousedown', handleMouseDown);
-        canvas.addEventListener('mousemove', handleMouseMove);
-        canvas.addEventListener('mouseup', handleMouseUp);
-
-        function handleMouseDown(e) {
-            const rect = canvas.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / scale) * (400/400);
-            const y = ((e.clientY - rect.top) / scale) * (400/400);
-            
-            if(document.getElementById('dotMode').checked) {
-                if(x >= 0 && x <= 400 && y >= 0 && y <= 400) {
-                    const roundedX = Math.round(x / 2) * 2;
-                    const roundedY = Math.round(y / 2) * 2;
-                    dots.push({x: roundedX, y: roundedY});
-                }
-            } else {
-                selectedDot = findNearestDot(x, y);
-                if(selectedDot !== null) {
-                    isDragging = true;
-                }
-            }
-            draw();
-        }
-
-        function handleMouseMove(e) {
-            if(!isDragging) return;
-            
-            const rect = canvas.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / scale) * (400/400);
-            const y = ((e.clientY - rect.top) / scale) * (400/400);
-            
-            tempEdge = {
-                start: selectedDot,
-                end: {x, y},
-                curvature: parseInt(document.getElementById('curvatureSlider').value)
-            };
-            
-            draw();
-        }
-
-        function handleMouseUp(e) {
-            if(!isDragging) return;
-            
-            const rect = canvas.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / scale) * (400/400);
-            const y = ((e.clientY - rect.top) / scale) * (400/400);
-            
-            const endDot = findNearestDot(x, y);
-            if(endDot !== null && endDot !== selectedDot) {
-                edges.push({
-                    start: selectedDot,
-                    end: endDot,
-                    curvature: parseInt(document.getElementById('curvatureSlider').value)
-                });
-            }
-            
-            isDragging = false;
-            tempEdge = null;
-            draw();
-        }
-
-        function findNearestDot(x, y) {
-            for(let i = 0; i < dots.length; i++) {
-                const dx = dots[i].x - x;
-                const dy = dots[i].y - y;
-                if(Math.sqrt(dx*dx + dy*dy) < 10) {
-                    return i;
-                }
-            }
-            return null;
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.save();
-            ctx.scale(scale, scale);
-            
-            drawGrid();
-            
-            // Draw edges with glow effect
-            ctx.shadowColor = 'rgba(0,120,212,0.4)';
-            ctx.shadowBlur = 10;
-            ctx.strokeStyle = '#0078d4';
-            ctx.lineWidth = 2;
-            edges.forEach(edge => drawEdge(edge));
-            
-            if(tempEdge) {
-                ctx.beginPath();
-                ctx.moveTo(dots[tempEdge.start].x, dots[tempEdge.start].y);
-                
-                if(tempEdge.curvature !== 0) {
-                    const midX = (dots[tempEdge.start].x + tempEdge.end.x) / 2;
-                    const midY = (dots[tempEdge.start].y + tempEdge.end.y) / 2;
-                    const normal = {
-                        x: -(tempEdge.end.y - dots[tempEdge.start].y),
-                        y: tempEdge.end.x - dots[tempEdge.start].x
-                    };
-                    const len = Math.sqrt(normal.x*normal.x + normal.y*normal.y);
-                    const controlPoint = {
-                        x: midX + normal.x/len * tempEdge.curvature,
-                        y: midY + normal.y/len * tempEdge.curvature
-                    };
-                    
-                    ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, tempEdge.end.x, tempEdge.end.y);
-                } else {
-                    ctx.lineTo(tempEdge.end.x, tempEdge.end.y);
-                }
-                
-                ctx.stroke();
-            }
-            
-            // Draw dots with glow effect
-            ctx.shadowColor = 'rgba(0,120,212,0.6)';
-            ctx.shadowBlur = 15;
-            ctx.fillStyle = '#fff';
-            ctx.strokeStyle = '#0078d4';
-            ctx.lineWidth = 2;
-            dots.forEach((dot, i) => {
-                ctx.beginPath();
-                ctx.arc(dot.x, dot.y, 5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-                
-                // Reset shadow for text
-                ctx.shadowColor = 'transparent';
-                ctx.fillStyle = '#fff';
-                ctx.font = '12px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(i.toString(), dot.x, dot.y + 15);
-            });
-            
-            ctx.restore();
-        }
-
-        function drawEdge(edge) {
-            ctx.beginPath();
-            ctx.moveTo(dots[edge.start].x, dots[edge.start].y);
-            
-            if(edge.curvature !== 0) {
-                const midX = (dots[edge.start].x + dots[edge.end].x) / 2;
-                const midY = (dots[edge.start].y + dots[edge.end].y) / 2;
-                const normal = {
-                    x: -(dots[edge.end].y - dots[edge.start].y),
-                    y: dots[edge.end].x - dots[edge.start].x
-                };
-                const len = Math.sqrt(normal.x*normal.x + normal.y*normal.y);
-                const controlPoint = {
-                    x: midX + normal.x/len * edge.curvature,
-                    y: midY + normal.y/len * edge.curvature
-                };
-                
-                ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, dots[edge.end].x, dots[edge.end].y);
-            } else {
-                ctx.lineTo(dots[edge.end].x, dots[edge.end].y);
-            }
-            
-            ctx.stroke();
-        }
-
-        function exportGraph() {
-    // Construct JSON data
-    const data = {
-        dots: dots.map(dot => ({ x: dot.x, y: dot.y })),
-        edges: edges.map(edge => {
-            const edgeData = {
-                startIndex: edge.start,
-                endIndex: edge.end
-            };
-            if (edge.curvature !== 0) {
-                const midX = (dots[edge.start].x + dots[edge.end].x) / 2;
-                const midY = (dots[edge.start].y + dots[edge.end].y) / 2;
-                const normal = {
-                    x: -(dots[edge.end].y - dots[edge.start].y),
-                    y: dots[edge.end].x - dots[edge.start].x
-                };
-                const len = Math.sqrt(normal.x * normal.x + normal.y * normal.y);
-                edgeData.controlPoint = {
-                    x: midX + (normal.x / len) * edge.curvature,
-                    y: midY + (normal.y / len) * edge.curvature
-                };
-            }
-            return edgeData;
-        })
-    };
-
-    // Convert JSON to string
-    const jsonString = JSON.stringify(data, null, 2);
-
-    // Display iOS-style dialog for filename input
-    const fileName = prompt("Enter filename") || "graph";
-    const blob = new Blob([jsonString], { type: "application/json" });
-
-    // Create a link element to initiate download
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `${fileName}.json`;
-    link.style.display = "none";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-
-        draw();
-    </script>
-</body>
+         </div>
+      </div>
+      <div class="container">
+         <canvas id="canvas"></canvas>
+      </div>
+      <div class="controls">
+         <button onclick="exportGraph()">Export</button>
+      </div>
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.0/dist/sweetalert2.all.min.js"></script>
+      <script>
+         const canvas = document.getElementById('canvas');
+         const ctx = canvas.getContext('2d');
+         const dots = [];
+         const edges = [];
+         let selectedDot = null;
+         let tempEdge = null;
+         let isDragging = false;
+         let selectedEdge = null;
+         
+         const dpr = window.devicePixelRatio || 1;
+         const rect = canvas.getBoundingClientRect();
+         
+         canvas.width = rect.width * dpr;
+         canvas.height = rect.height * dpr;
+         ctx.scale(dpr, dpr);
+         
+         const scale = 2;
+         
+         function drawGrid() {
+             ctx.strokeStyle = '#363636';
+             ctx.lineWidth = 0.5;
+             
+             for(let x = 0; x <= 400; x += 10) {
+                 ctx.beginPath();
+                 ctx.moveTo(x * scale, 0);
+                 ctx.lineTo(x * scale, 800);
+                 ctx.stroke();
+             }
+             
+             for(let y = 0; y <= 400; y += 10) {
+                 ctx.beginPath(); 
+                 ctx.moveTo(0, y * scale);
+                 ctx.lineTo(800, y * scale);
+                 ctx.stroke();
+             }
+         
+             ctx.strokeStyle = '#2d2d2d';
+             ctx.lineWidth = 0.2;
+             
+             for(let x = 0; x <= 400; x += 2) {
+                 ctx.beginPath();
+                 ctx.moveTo(x * scale, 0);
+                 ctx.lineTo(x * scale, 800);
+                 ctx.stroke();
+             }
+             
+             for(let y = 0; y <= 400; y += 2) {
+                 ctx.beginPath();
+                 ctx.moveTo(0, y * scale);
+                 ctx.lineTo(800, y * scale);
+                 ctx.stroke();
+             }
+             
+             ctx.strokeStyle = '#0078d4';
+             ctx.lineWidth = 2;
+         }
+         
+         function resetCurvature() {
+             document.getElementById('curvatureSlider').value = 0;
+             draw();
+         }
+         
+         canvas.addEventListener('mousedown', handleMouseDown);
+         canvas.addEventListener('mousemove', handleMouseMove);
+         canvas.addEventListener('mouseup', handleMouseUp);
+         
+         function handleMouseDown(e) {
+             const rect = canvas.getBoundingClientRect();
+             const x = ((e.clientX - rect.left) / scale) * (400/400);
+             const y = ((e.clientY - rect.top) / scale) * (400/400);
+             
+             if(document.getElementById('dotMode').checked) {
+                 if(x >= 0 && x <= 400 && y >= 0 && y <= 400) {
+                     const roundedX = Math.round(x / 2) * 2;
+                     const roundedY = Math.round(y / 2) * 2;
+                     dots.push({x: roundedX, y: roundedY});
+                 }
+             } else {
+                 selectedDot = findNearestDot(x, y);
+                 if(selectedDot !== null) {
+                     isDragging = true;
+                 }
+             }
+             draw();
+         }
+         
+         function handleMouseMove(e) {
+             if(!isDragging) return;
+             
+             const rect = canvas.getBoundingClientRect();
+             const x = ((e.clientX - rect.left) / scale) * (400/400);
+             const y = ((e.clientY - rect.top) / scale) * (400/400);
+             
+             tempEdge = {
+                 start: selectedDot,
+                 end: {x, y},
+                 curvature: parseInt(document.getElementById('curvatureSlider').value)
+             };
+             
+             draw();
+         }
+         
+         function handleMouseUp(e) {
+             if(!isDragging) return;
+             
+             const rect = canvas.getBoundingClientRect();
+             const x = ((e.clientX - rect.left) / scale) * (400/400);
+             const y = ((e.clientY - rect.top) / scale) * (400/400);
+             
+             const endDot = findNearestDot(x, y);
+             if(endDot !== null && endDot !== selectedDot) {
+                 edges.push({
+                     start: selectedDot,
+                     end: endDot,
+                     curvature: parseInt(document.getElementById('curvatureSlider').value)
+                 });
+             }
+             
+             isDragging = false;
+             tempEdge = null;
+             draw();
+         }
+         
+         function findNearestDot(x, y) {
+             for(let i = 0; i < dots.length; i++) {
+                 const dx = dots[i].x - x;
+                 const dy = dots[i].y - y;
+                 if(Math.sqrt(dx*dx + dy*dy) < 10) {
+                     return i;
+                 }
+             }
+             return null;
+         }
+         
+         function draw() {
+             ctx.clearRect(0, 0, canvas.width, canvas.height);
+             
+             ctx.save();
+             ctx.scale(scale, scale);
+             
+             drawGrid();
+             
+             ctx.shadowColor = 'rgba(0,120,212,0.4)';
+             ctx.shadowBlur = 10;
+             ctx.strokeStyle = '#0078d4';
+             ctx.lineWidth = 2;
+             edges.forEach(edge => drawEdge(edge));
+             
+             if(tempEdge) {
+                 ctx.beginPath();
+                 ctx.moveTo(dots[tempEdge.start].x, dots[tempEdge.start].y);
+                 
+                 if(tempEdge.curvature !== 0) {
+                     const midX = (dots[tempEdge.start].x + tempEdge.end.x) / 2;
+                     const midY = (dots[tempEdge.start].y + tempEdge.end.y) / 2;
+                     const normal = {
+                         x: -(tempEdge.end.y - dots[tempEdge.start].y),
+                         y: tempEdge.end.x - dots[tempEdge.start].x
+                     };
+                     const len = Math.sqrt(normal.x*normal.x + normal.y*normal.y);
+                     const controlPoint = {
+                         x: midX + normal.x/len * tempEdge.curvature,
+                         y: midY + normal.y/len * tempEdge.curvature
+                     };
+                     
+                     ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, tempEdge.end.x, tempEdge.end.y);
+                 } else {
+                     ctx.lineTo(tempEdge.end.x, tempEdge.end.y);
+                 }
+                 
+                 ctx.stroke();
+             }
+             
+             ctx.shadowColor = 'rgba(0,120,212,0.6)';
+             ctx.shadowBlur = 15;
+             ctx.fillStyle = '#fff';
+             ctx.strokeStyle = '#0078d4';
+             ctx.lineWidth = 2;
+             dots.forEach((dot, i) => {
+                 ctx.beginPath();
+                 ctx.arc(dot.x, dot.y, 5, 0, Math.PI * 2);
+                 ctx.fill();
+                 ctx.stroke();
+                 
+                 ctx.shadowColor = 'transparent';
+                 ctx.fillStyle = '#fff';
+                 ctx.font = '12px sans-serif';
+                 ctx.textAlign = 'center';
+                 ctx.textBaseline = 'middle';
+                 ctx.fillText(i.toString(), dot.x, dot.y + 15);
+             });
+             
+             ctx.restore();
+         }
+         
+         function drawEdge(edge) {
+             ctx.beginPath();
+             ctx.moveTo(dots[edge.start].x, dots[edge.start].y);
+             
+             if(edge.curvature !== 0) {
+                 const midX = (dots[edge.start].x + dots[edge.end].x) / 2;
+                 const midY = (dots[edge.start].y + dots[edge.end].y) / 2;
+                 const normal = {
+                     x: -(dots[edge.end].y - dots[edge.start].y),
+                     y: dots[edge.end].x - dots[edge.start].x
+                 };
+                 const len = Math.sqrt(normal.x*normal.x + normal.y*normal.y);
+                 const controlPoint = {
+                     x: midX + normal.x/len * edge.curvature,
+                     y: midY + normal.y/len * edge.curvature
+                 };
+                 
+                 ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, dots[edge.end].x, dots[edge.end].y);
+             } else {
+                 ctx.lineTo(dots[edge.end].x, dots[edge.end].y);
+             }
+             
+             ctx.stroke();
+         }
+         
+         function exportGraph() {
+         const data = {
+         dots: dots.map(dot => ({ x: dot.x, y: dot.y })),
+         edges: edges.map(edge => {
+             const edgeData = {
+                 startIndex: edge.start,
+                 endIndex: edge.end
+             };
+             if (edge.curvature !== 0) {
+                 const midX = (dots[edge.start].x + dots[edge.end].x) / 2;
+                 const midY = (dots[edge.start].y + dots[edge.end].y) / 2;
+                 const normal = {
+                     x: -(dots[edge.end].y - dots[edge.start].y),
+                     y: dots[edge.end].x - dots[edge.start].x
+                 };
+                 const len = Math.sqrt(normal.x * normal.x + normal.y * normal.y);
+                 edgeData.controlPoint = {
+                     x: midX + (normal.x / len) * edge.curvature,
+                     y: midY + (normal.y / len) * edge.curvature
+                 };
+             }
+             return edgeData;
+         })
+         };
+         
+         const jsonString = JSON.stringify(data, null, 2);
+         
+         const now = new Date();
+         const defaultFileName = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+         
+         Swal.fire({
+         title: 'Save File',
+         html: '<div style="text-align: left; margin-bottom: 10px;">Where would you like to save the file?</div>',
+         input: 'text',
+         inputValue: defaultFileName,
+         inputPlaceholder: 'Enter filename',
+         showCancelButton: true,
+         confirmButtonText: 'Save',
+         cancelButtonText: 'Cancel',
+         customClass: {
+             container: 'save-dialog-container'
+         },
+         inputValidator: (value) => {
+             if (!value) {
+                 return 'Please enter a filename';
+             }
+         }
+         }).then((result) => {
+         if (result.isConfirmed) {
+             const blob = new Blob([jsonString], { type: "application/json" });
+             const link = document.createElement("a");
+             link.href = URL.createObjectURL(blob);
+             link.download = `${result.value}.json`;
+             link.style.display = "none";
+             document.body.appendChild(link);
+             link.click();
+             document.body.removeChild(link);
+         }
+         });
+         }
+         
+         draw();
+      </script>
+   </body>
 </html>
