@@ -460,37 +460,48 @@
         }
 
         function exportGraph() {
-            let output = 'final List<Offset> dots = [\n';
-            dots.forEach(dot => {
-                output += `  const Offset(${dot.x}, ${dot.y}),\n`;
-            });
-            output += '];\n\n';
+    // Construct JSON data
+    const data = {
+        dots: dots.map(dot => ({ x: dot.x, y: dot.y })),
+        edges: edges.map(edge => {
+            const edgeData = {
+                startIndex: edge.start,
+                endIndex: edge.end
+            };
+            if (edge.curvature !== 0) {
+                const midX = (dots[edge.start].x + dots[edge.end].x) / 2;
+                const midY = (dots[edge.start].y + dots[edge.end].y) / 2;
+                const normal = {
+                    x: -(dots[edge.end].y - dots[edge.start].y),
+                    y: dots[edge.end].x - dots[edge.start].x
+                };
+                const len = Math.sqrt(normal.x * normal.x + normal.y * normal.y);
+                edgeData.controlPoint = {
+                    x: midX + (normal.x / len) * edge.curvature,
+                    y: midY + (normal.y / len) * edge.curvature
+                };
+            }
+            return edgeData;
+        })
+    };
 
-            output += 'final List<Edge> edges = [\n';
-            edges.forEach(edge => {
-                if(edge.curvature !== 0) {
-                    const midX = (dots[edge.start].x + dots[edge.end].x) / 2;
-                    const midY = (dots[edge.start].y + dots[edge.end].y) / 2;
-                    const normal = {
-                        x: -(dots[edge.end].y - dots[edge.start].y),
-                        y: dots[edge.end].x - dots[edge.start].x
-                    };
-                    const len = Math.sqrt(normal.x*normal.x + normal.y*normal.y);
-                    const controlPoint = {
-                        x: midX + normal.x/len * edge.curvature,
-                        y: midY + normal.y/len * edge.curvature
-                    };
-                    
-                    output += `  Edge(${edge.start}, ${edge.end}, isCurved: true, controlPoint: const Offset(${controlPoint.x}, ${controlPoint.y})),\n`;
-                } else {
-                    output += `  Edge(${edge.start}, ${edge.end}),\n`;
-                }
-            });
-            output += '];';
+    // Convert JSON to string
+    const jsonString = JSON.stringify(data, null, 2);
 
-            navigator.clipboard.writeText(output);
-            alert('Exported to clipboard!');
-        }
+    // Display iOS-style dialog for filename input
+    const fileName = prompt("Enter filename") || "graph";
+    const blob = new Blob([jsonString], { type: "application/json" });
+
+    // Create a link element to initiate download
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${fileName}.json`;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 
         draw();
     </script>
