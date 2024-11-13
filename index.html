@@ -6,12 +6,13 @@
       <style>
          :root {
              --primary: #0078d4;
-             --primary-dark: #006cbd;
+             --primary-dark: #005a9e;
              --bg-dark: #1e1e1e;
              --bg-darker: #161616;
              --surface: #252526;
              --surface-hover: #2d2d2d;
              --text: #ffffff;
+             --button-icon-size: 18px;
          }
          body {
              background: var(--bg-dark);
@@ -90,8 +91,10 @@
              position: absolute;
              top: 0;
              left: 0;
-             width: 800px;
-             height: 800px;
+             max-width: 100%;
+             max-height: 100%;
+             width: auto;
+             height: auto;
              opacity: 0.5;
              pointer-events: none;
              z-index: 1; /* Ensures imageLayer is below canvas by default */
@@ -134,6 +137,9 @@
              font-weight: 500;
              position: relative;
              overflow: hidden;
+             display: flex;
+             align-items: center;
+             gap: 8px;
          }
          input[type="radio"] + label:hover {
              background: rgba(255,255,255,0.1);
@@ -166,16 +172,18 @@
              padding: 16px;
              border-radius: 8px;
              border: 1px solid rgba(255,255,255,0.1);
-             flex-wrap: wrap;
+             /* Changed from flex-wrap: wrap to nowrap to keep elements on the same line */
+             flex-wrap: nowrap;
              gap: 10px;
          }
          .slider-container label {
              margin-right: 10px;
              min-width: 120px;
              text-align: right;
+             flex-shrink: 0; /* Prevents the label from shrinking */
          }
          input[type="range"] {
-             width: 400px; /* Increased width for longer slider */
+             width: 200px; /* Adjusted width to accommodate all elements */
              height: 6px;
              -webkit-appearance: none;
              background: rgba(255,255,255,0.1);
@@ -210,6 +218,7 @@
              text-align: center;
              font-size: 14px;
              transition: border-color 0.3s ease, box-shadow 0.3s ease;
+             flex-shrink: 0; /* Prevents the input from shrinking */
          }
          .number-input:focus {
              border-color: var(--primary);
@@ -229,6 +238,10 @@
              position: relative;
              overflow: hidden;
              box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+             display: inline-flex;
+             align-items: center;
+             gap: 8px;
+             flex-shrink: 0; /* Prevents the button from shrinking */
          }
          button:hover {
              background: var(--primary-dark);
@@ -254,9 +267,42 @@
          }
          button.secondary {
              background: rgba(255,255,255,0.1);
+             color: #ffffff;
          }
          button.secondary:hover {
              background: rgba(255,255,255,0.15);
+         }
+         .button-icon {
+             font-size: var(--button-icon-size);
+         }
+
+         /* Responsive Adjustments */
+         @media (max-width: 850px) {
+             .container {
+                 width: 100%;
+                 height: auto;
+             }
+             canvas {
+                 width: 100%;
+                 height: auto;
+             }
+             .slider-container {
+                 flex-direction: column;
+                 align-items: flex-start;
+             }
+             .slider-container label,
+             .slider-container input,
+             .slider-container button {
+                 width: 100%;
+                 margin: 5px 0;
+             }
+             input[type="range"] {
+                 width: 100%;
+                 margin: 10px 0;
+             }
+             button {
+                 width: 100%;
+             }
          }
       </style>
    </head>
@@ -264,27 +310,27 @@
       <div class="controls">
           <div class="radio-group">
               <input type="radio" name="mode" id="dotMode" checked>
-              <label for="dotMode">Add Dots</label>
+              <label for="dotMode"><span class="button-icon">🎟</span>Add Dots</label>
               <input type="radio" name="mode" id="edgeMode">
-              <label for="edgeMode">Add Edges</label>
+              <label for="edgeMode"><span class="button-icon">🎗</span>Add Edges</label>
           </div>
           <div class="slider-container">
               <label for="curvatureSlider">Edge Curvature:</label>
               <input type="range" id="curvatureSlider" min="-300" max="300" value="0" step="1"> <!-- Updated min and max -->
               <input type="number" id="curvatureInput" class="number-input" min="-300" max="300" value="0"> <!-- Updated min and max -->
-              <button class="secondary" onclick="resetCurvature()">Reset</button>
+              <button class="secondary" onclick="resetCurvature()"><span class="button-icon">🔄</span>Reset</button>
               <!-- Removed the tick marks and labels -->
           </div>
           <input type="file" id="imageInput" accept="image/*" style="display: none">
-          <button onclick="document.getElementById('imageInput').click()">Upload Image</button>
-          <button onclick="toggleImageInteraction()" id="toggleBtn">Enable Image Interaction</button>
+          <button onclick="document.getElementById('imageInput').click()"><span class="button-icon">📤</span>Upload Image</button>
+          <button onclick="toggleImageInteraction()" id="toggleBtn"><span class="button-icon">🎁</span>Enable Image Interaction</button>
       </div>
       <div class="container">
           <img id="imageLayer" style="display:none"> <!-- Moved above the canvas -->
           <canvas id="canvas"></canvas>
       </div>
       <div class="controls">
-          <button onclick="exportGraph()">Export</button>
+          <button onclick="exportGraph()"><span class="button-icon">💾</span>Export</button>
       </div>
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.0/dist/sweetalert2.all.min.js"></script>
       <script>
@@ -310,6 +356,55 @@
          const container = document.querySelector('.container');
          const curvatureSlider = document.getElementById('curvatureSlider');
          const curvatureInput = document.getElementById('curvatureInput');
+         const dotModeRadio = document.getElementById('dotMode');
+         const edgeModeRadio = document.getElementById('edgeMode');
+
+         // History stack for undo functionality
+         const historyStack = [];
+         const MAX_HISTORY = 20; // Optional: Limit the history stack size
+
+         function saveState() {
+             const dotsCopy = dots.map(dot => ({...dot}));
+             const edgesCopy = edges.map(edge => ({...edge}));
+             historyStack.push({dots: dotsCopy, edges: edgesCopy});
+             if(historyStack.length > MAX_HISTORY) {
+                 historyStack.shift(); // Remove the oldest state
+             }
+         }
+
+         function undo() {
+             if(historyStack.length === 0) {
+                 Swal.fire('Nothing to undo', '', 'info');
+                 return;
+             }
+             const lastState = historyStack.pop();
+             // Restore dots
+             dots.length = 0;
+             lastState.dots.forEach(dot => dots.push(dot));
+             // Restore edges
+             edges.length = 0;
+             lastState.edges.forEach(edge => edges.push(edge));
+             draw();
+         }
+
+         // Center the image when it's loaded
+         imageLayer.onload = function() {
+             // Get container dimensions
+             const containerRect = container.getBoundingClientRect();
+             const containerWidth = containerRect.width;
+             const containerHeight = containerRect.height;
+
+             // Get image display dimensions
+             const imageRect = imageLayer.getBoundingClientRect();
+             const imageWidth = imageRect.width;
+             const imageHeight = imageRect.height;
+
+             // Calculate offsets to center the image
+             imageX = (containerWidth - imageWidth) / 2;
+             imageY = (containerHeight - imageHeight) / 2;
+
+             updateImageTransform();
+         };
 
          imageInput.addEventListener('change', function(e) {
              const file = e.target.files[0];
@@ -331,6 +426,9 @@
              imageInteractive = !imageInteractive;
              imageLayer.classList.toggle('interactive');
              toggleBtn.textContent = imageInteractive ? 'Disable Image Interaction' : 'Enable Image Interaction';
+             toggleBtn.innerHTML = imageInteractive 
+                 ? '<span class="button-icon">🔓</span>Disable Image Interaction' 
+                 : '<span class="button-icon">🎁</span>Enable Image Interaction';
 
              if (imageInteractive) {
                  // Optionally disable canvas pointer events to prevent interference
@@ -452,8 +550,9 @@
              const x = ((e.clientX - rect.left) / scale) * (400/400);
              const y = ((e.clientY - rect.top) / scale) * (400/400);
              
-             if(document.getElementById('dotMode').checked) {
+             if(dotModeRadio.checked) {
                  if(x >= 0 && x <= 400 && y >= 0 && y <= 400) {
+                     saveState(); // Save state before adding a dot
                      const roundedX = Math.round(x / 2) * 2;
                      const roundedY = Math.round(y / 2) * 2;
                      dots.push({x: roundedX, y: roundedY});
@@ -492,6 +591,7 @@
              
              const endDot = findNearestDot(x, y);
              if(endDot !== null && endDot !== selectedDot) {
+                 saveState(); // Save state before adding an edge
                  edges.push({
                      start: selectedDot,
                      end: endDot,
@@ -662,6 +762,32 @@
              });
          }
          
+         // Change cursor based on selected mode
+         function updateCursor() {
+             if(dotModeRadio.checked) {
+                 container.style.cursor = 'crosshair';
+             } else if(edgeModeRadio.checked) {
+                 container.style.cursor = 'pointer';
+             } else {
+                 container.style.cursor = 'default';
+             }
+         }
+
+         // Add event listeners for radio buttons to update cursor
+         dotModeRadio.addEventListener('change', updateCursor);
+         edgeModeRadio.addEventListener('change', updateCursor);
+
+         // Initialize cursor
+         updateCursor();
+
+         // Add keyboard listener for undo (Ctrl+Z)
+         document.addEventListener('keydown', function(e) {
+             if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                 e.preventDefault();
+                 undo();
+             }
+         });
+
          draw();
       </script>
    </body>
