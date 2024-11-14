@@ -728,15 +728,18 @@
              
              const jsonString = JSON.stringify(data, null, 2);
              
-             const now = new Date();
-             const defaultFileName = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+             // Removed defaultFileName based on date and time
              
              Swal.fire({
                  title: 'Save File',
-                 html: '<div style="text-align: left; margin-bottom: 10px;">Where would you like to save the file?</div>',
-                 input: 'text',
-                 inputValue: defaultFileName,
-                 inputPlaceholder: 'Enter filename',
+                 html: '<div style="text-align: left; margin-bottom: 10px;">Nhập một số là level để đặt tên file</div>',
+                 input: 'number',
+                 inputValue: '1', // Giá trị mặc định
+                 inputPlaceholder: 'Nhập level',
+                 inputAttributes: {
+                     min: 1,
+                     step: 1
+                 },
                  showCancelButton: true,
                  confirmButtonText: 'Save',
                  cancelButtonText: 'Cancel',
@@ -745,7 +748,10 @@
                  },
                  inputValidator: (value) => {
                      if (!value) {
-                         return 'Please enter a filename';
+                         return 'Vui lòng nhập một số';
+                     }
+                     if (!Number.isInteger(Number(value)) || Number(value) < 1) {
+                         return 'Vui lòng nhập một số nguyên dương hợp lệ';
                      }
                  }
              }).then((result) => {
@@ -753,7 +759,7 @@
                      const blob = new Blob([jsonString], { type: "application/json" });
                      const link = document.createElement("a");
                      link.href = URL.createObjectURL(blob);
-                     link.download = `${result.value}.json`;
+                     link.download = `lv_${result.value}.json`; // Thêm tiền tố 'lv_'
                      link.style.display = "none";
                      document.body.appendChild(link);
                      link.click();
