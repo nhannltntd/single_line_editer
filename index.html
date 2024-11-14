@@ -209,14 +209,14 @@
              box-shadow: 0 4px 12px rgba(0,120,212,0.5);
          }
          .number-input {
-             width: 60px;
-             padding: 8px;
+             width: 100px; /* Increased width */
+             padding: 12px; /* Increased padding */
              border: 1px solid rgba(255,255,255,0.2);
              border-radius: 6px;
              background: rgba(255,255,255,0.1);
              color: #ffffff;
              text-align: center;
-             font-size: 14px;
+             font-size: 24px; /* Increased font size */
              transition: border-color 0.3s ease, box-shadow 0.3s ease;
              flex-shrink: 0; /* Prevents the input from shrinking */
          }
@@ -303,6 +303,55 @@
              button {
                  width: 100%;
              }
+             .number-input {
+                 width: 100%;
+                 font-size: 20px;
+             }
+             #incrementLevel {
+                 padding: 12px;
+                 font-size: 20px;
+             }
+         }
+
+         /* Styles for Save Animation Canvas and Saved Icon */
+         #saveAnimation {
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             pointer-events: none;
+             z-index: 9999;
+         }
+
+         #savedIcon {
+             position: fixed;
+             top: 20px;
+             right: 20px;
+             background: rgba(0, 0, 0, 0.7);
+             color: #ffffff;
+             padding: 10px 20px;
+             border-radius: 30px;
+             display: none;
+             align-items: center;
+             gap: 8px;
+             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+             opacity: 0;
+             transform: scale(0.8);
+         }
+
+         /* Animation for Saved Icon */
+         @keyframes fadeInOut {
+             0% { opacity: 0; transform: scale(0.8); }
+             10% { opacity: 1; transform: scale(1); }
+             90% { opacity: 1; transform: scale(1); }
+             100% { opacity: 0; transform: scale(0.8); }
+         }
+
+         /* Animation class */
+         #savedIcon.animate {
+             display: flex;
+             animation: fadeInOut 2s forwards;
          }
       </style>
    </head>
@@ -330,10 +379,218 @@
           <canvas id="canvas"></canvas>
       </div>
       <div class="controls">
-          <button onclick="exportGraph()"><span class="button-icon">💾</span>Export</button>
+          <button id="saveButton" onclick="exportGraph()"><span class="button-icon">💾</span>Export</button>
       </div>
+
+      <!-- Canvas cho hiệu ứng ánh sáng galaxy -->
+      <canvas id="saveAnimation"></canvas>
+
+      <!-- Icon thông báo lưu thành công -->
+      <div id="savedIcon"><span>✔️ Saved</span></div>
+
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.0/dist/sweetalert2.all.min.js"></script>
       <script>
+         // Các đoạn mã JavaScript hiện tại của bạn...
+
+         // Thêm đoạn mã dưới đây vào cuối thẻ <script>
+
+         // Lớp Particle để quản lý các hạt ánh sáng
+         class Particle {
+             constructor(x, y, targetX, targetY) {
+                 this.x = x;
+                 this.y = y;
+                 // Tính toán vector hướng tới điểm đích
+                 const dx = targetX - x;
+                 const dy = targetY - y;
+                 const distance = Math.sqrt(dx * dx + dy * dy);
+                 const speed = distance / 60; // Tổng thời gian 60 frames
+                 this.vx = dx / distance * speed;
+                 this.vy = dy / distance * speed;
+                 this.opacity = 1;
+                 this.size = Math.random() * 3 + 2;
+                 // Màu sắc ngẫu nhiên với tông màu xanh dương/tím
+                 const hue = Math.random() * 60 + 240; // 240-300 độ
+                 this.color = `hsl(${hue}, 100%, 75%)`;
+             }
+
+             update() {
+                 this.x += this.vx;
+                 this.y += this.vy;
+                 this.opacity -= 1 / 60;
+             }
+
+             draw(ctx) {
+                 ctx.globalAlpha = this.opacity;
+                 ctx.fillStyle = this.color;
+                 ctx.beginPath();
+                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                 ctx.fill();
+             }
+
+             isDead() {
+                 return this.opacity <= 0;
+             }
+         }
+
+         // Hàm để hiển thị icon thông báo lưu thành công
+         function showSavedIcon() {
+             const savedIcon = document.getElementById('savedIcon');
+             savedIcon.classList.add('animate');
+
+             // Loại bỏ lớp 'animate' sau khi animation kết thúc để có thể kích hoạt lại sau này
+             savedIcon.addEventListener('animationend', () => {
+                 savedIcon.classList.remove('animate');
+             }, { once: true });
+         }
+
+         // Hàm để kích hoạt hiệu ứng ánh sáng khi lưu
+         function triggerSaveAnimation() {
+             const animationCanvas = document.getElementById('saveAnimation');
+             const ctx = animationCanvas.getContext('2d');
+             const particles = [];
+
+             // Thiết lập kích thước canvas
+             function resizeCanvas() {
+                 animationCanvas.width = window.innerWidth;
+                 animationCanvas.height = window.innerHeight;
+             }
+             resizeCanvas();
+             window.addEventListener('resize', resizeCanvas);
+
+             // Lấy vị trí nút Save (Export)
+             const saveButton = document.getElementById('saveButton');
+             const rect = saveButton.getBoundingClientRect();
+             const startX = rect.left + rect.width / 2;
+             const startY = rect.top + rect.height / 2;
+
+             // Định vị điểm đích ở góc trên cùng bên phải (40px từ trên và phải)
+             const targetX = window.innerWidth - 40;
+             const targetY = 40;
+
+             // Tạo nhiều hạt
+             const numParticles = 20;
+             for(let i=0; i<numParticles; i++) {
+                 particles.push(new Particle(startX, startY, targetX, targetY));
+             }
+
+             // Vòng lặp animation
+             function animate() {
+                 ctx.clearRect(0, 0, animationCanvas.width, animationCanvas.height);
+                 particles.forEach(p => {
+                     p.update();
+                     p.draw(ctx);
+                 });
+
+                 // Loại bỏ các hạt đã biến mất
+                 for(let i = particles.length -1; i >=0; i--){
+                     if(particles[i].isDead()) {
+                         particles.splice(i, 1);
+                     }
+                 }
+
+                 if(particles.length > 0) {
+                     requestAnimationFrame(animate);
+                 } else {
+                     // Hiển thị icon thông báo lưu thành công
+                     showSavedIcon();
+                     // Xóa canvas sau khi hoàn thành
+                     ctx.clearRect(0, 0, animationCanvas.width, animationCanvas.height);
+                 }
+             }
+
+             animate();
+         }
+
+         // Chỉnh sửa hàm exportGraph để gọi hiệu ứng khi lưu thành công
+         function exportGraph() {
+             const data = {
+                 dots: dots.map(dot => ({ x: dot.x, y: dot.y })),
+                 edges: edges.map(edge => {
+                     const edgeData = {
+                         startIndex: edge.start,
+                         endIndex: edge.end
+                     };
+                     if (edge.curvature !== 0) {
+                         const midX = (dots[edge.start].x + dots[edge.end].x) / 2;
+                         const midY = (dots[edge.start].y + dots[edge.end].y) / 2;
+                         const normal = {
+                             x: -(dots[edge.end].y - dots[edge.start].y),
+                             y: dots[edge.end].x - dots[edge.start].x
+                         };
+                         const len = Math.sqrt(normal.x * normal.x + normal.y * normal.y);
+                         edgeData.controlPoint = {
+                             x: midX + (normal.x / len) * edge.curvature,
+                             y: midY + (normal.y / len) * edge.curvature
+                         };
+                     }
+                     return edgeData;
+                 })
+             };
+
+             const jsonString = JSON.stringify(data, null, 2);
+
+             Swal.fire({
+                 title: 'Save File',
+                 html: `
+                     <div style="text-align: left; margin-bottom: 10px;">Nhập một số là level để đặt tên file</div>
+                     <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                         <input type="number" id="levelInput" class="number-input" min="1" step="1">
+                         <button id="incrementLevel" class="increment-button">+</button>
+                     </div>
+                 `,
+                 showCancelButton: true,
+                 confirmButtonText: 'Save',
+                 cancelButtonText: 'Cancel',
+                 focusConfirm: false, // To prevent auto focus on confirm button
+                 didOpen: () => {
+                     const levelInput = Swal.getPopup().querySelector('#levelInput');
+                     const incrementButton = Swal.getPopup().querySelector('#incrementLevel');
+                     
+                     // Load cached level
+                     const cachedLevel = localStorage.getItem('level') || '1';
+                     levelInput.value = cachedLevel;
+                     
+                     // Add event listener to increment button
+                     incrementButton.addEventListener('click', () => {
+                         let currentVal = parseInt(levelInput.value) || 1;
+                         currentVal += 1;
+                         levelInput.value = currentVal;
+                     });
+                 },
+                 preConfirm: () => {
+                     const level = Swal.getPopup().querySelector('#levelInput').value;
+                     if (!level) {
+                         Swal.showValidationMessage('Vui lòng nhập một số');
+                         return false;
+                     }
+                     if (!Number.isInteger(Number(level)) || Number(level) < 1) {
+                         Swal.showValidationMessage('Vui lòng nhập một số nguyên dương hợp lệ');
+                         return false;
+                     }
+                     // Save level to localStorage
+                     localStorage.setItem('level', level);
+                     return level;
+                 }
+             }).then((result) => {
+                 if (result.isConfirmed) {
+                     const level = result.value;
+                     const blob = new Blob([jsonString], { type: "application/json" });
+                     const link = document.createElement("a");
+                     link.href = URL.createObjectURL(blob);
+                     link.download = `lv_${level}.json`; // Thêm tiền tố 'lv_'
+                     link.style.display = "none";
+                     document.body.appendChild(link);
+                     link.click();
+                     document.body.removeChild(link);
+
+                     // Gọi hiệu ứng ánh sáng khi lưu thành công
+                     triggerSaveAnimation();
+                 }
+             });
+         }
+
+         // Các đoạn mã JavaScript hiện tại của bạn tiếp tục...
+
          const canvas = document.getElementById('canvas');
          const ctx = canvas.getContext('2d');
          const dots = [];
@@ -473,10 +730,10 @@
              imageLayer.style.transform = `translate(${imageX}px, ${imageY}px) scale(${imageScale})`;
          }
          const dpr = window.devicePixelRatio || 1;
-         const rect = canvas.getBoundingClientRect();
+         const rectCanvas = canvas.getBoundingClientRect();
          
-         canvas.width = rect.width * dpr;
-         canvas.height = rect.height * dpr;
+         canvas.width = rectCanvas.width * dpr;
+         canvas.height = rectCanvas.height * dpr;
          ctx.scale(dpr, dpr);
          
          const scale = 2;
@@ -699,73 +956,6 @@
              }
              
              ctx.stroke();
-         }
-         
-         function exportGraph() {
-             const data = {
-                 dots: dots.map(dot => ({ x: dot.x, y: dot.y })),
-                 edges: edges.map(edge => {
-                     const edgeData = {
-                         startIndex: edge.start,
-                         endIndex: edge.end
-                     };
-                     if (edge.curvature !== 0) {
-                         const midX = (dots[edge.start].x + dots[edge.end].x) / 2;
-                         const midY = (dots[edge.start].y + dots[edge.end].y) / 2;
-                         const normal = {
-                             x: -(dots[edge.end].y - dots[edge.start].y),
-                             y: dots[edge.end].x - dots[edge.start].x
-                         };
-                         const len = Math.sqrt(normal.x * normal.x + normal.y * normal.y);
-                         edgeData.controlPoint = {
-                             x: midX + (normal.x / len) * edge.curvature,
-                             y: midY + (normal.y / len) * edge.curvature
-                         };
-                     }
-                     return edgeData;
-                 })
-             };
-             
-             const jsonString = JSON.stringify(data, null, 2);
-             
-             // Removed defaultFileName based on date and time
-             
-             Swal.fire({
-                 title: 'Save File',
-                 html: '<div style="text-align: left; margin-bottom: 10px;">Nhập một số là level để đặt tên file</div>',
-                 input: 'number',
-                 inputValue: '1', // Giá trị mặc định
-                 inputPlaceholder: 'Nhập level',
-                 inputAttributes: {
-                     min: 1,
-                     step: 1
-                 },
-                 showCancelButton: true,
-                 confirmButtonText: 'Save',
-                 cancelButtonText: 'Cancel',
-                 customClass: {
-                     container: 'save-dialog-container'
-                 },
-                 inputValidator: (value) => {
-                     if (!value) {
-                         return 'Vui lòng nhập một số';
-                     }
-                     if (!Number.isInteger(Number(value)) || Number(value) < 1) {
-                         return 'Vui lòng nhập một số nguyên dương hợp lệ';
-                     }
-                 }
-             }).then((result) => {
-                 if (result.isConfirmed) {
-                     const blob = new Blob([jsonString], { type: "application/json" });
-                     const link = document.createElement("a");
-                     link.href = URL.createObjectURL(blob);
-                     link.download = `lv_${result.value}.json`; // Thêm tiền tố 'lv_'
-                     link.style.display = "none";
-                     document.body.appendChild(link);
-                     link.click();
-                     document.body.removeChild(link);
-                 }
-             });
          }
          
          // Change cursor based on selected mode
