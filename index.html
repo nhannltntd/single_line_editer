@@ -502,8 +502,83 @@
              animate();
          }
 
+         // Hàm để tìm đường đi Eulerian
+         function findEulerianPath(dots, edges) {
+             const adj = {};
+             const degree = {};
+
+             // Initialize adjacency list and degree count
+             for(let i=0; i<dots.length; i++) {
+                 adj[i] = [];
+                 degree[i] = 0;
+             }
+
+             // Populate adjacency list and degree
+             edges.forEach((edge, index) => {
+                 adj[edge.start].push({node: edge.end, edgeId: index});
+                 adj[edge.end].push({node: edge.start, edgeId: index});
+                 degree[edge.start]++;
+                 degree[edge.end]++;
+             });
+
+             // Find nodes with odd degree
+             const oddNodes = [];
+             for(let i=0; i<dots.length; i++) {
+                 if(degree[i] % 2 !== 0) {
+                     oddNodes.push(i);
+                 }
+             }
+
+             // Check for Eulerian Path conditions
+             if(oddNodes.length !== 0 && oddNodes.length !== 2) {
+                 return null;
+             }
+
+             // Start node
+             let startNode = 0;
+             if(oddNodes.length === 2) {
+                 startNode = oddNodes[0];
+             }
+
+             const path = [];
+             const stack = [startNode];
+             const usedEdges = new Set();
+
+             while(stack.length > 0) {
+                 const current = stack[stack.length -1];
+                 if(adj[current].length === 0) {
+                     path.push(stack.pop());
+                 } else {
+                     const next = adj[current].pop();
+                     if(!usedEdges.has(next.edgeId)) {
+                         usedEdges.add(next.edgeId);
+                         stack.push(next.node);
+                     }
+                 }
+             }
+
+             // Check if all edges are used
+             if(usedEdges.size !== edges.length) {
+                 return null;
+             }
+
+             return path;
+         }
+
          // Chỉnh sửa hàm exportGraph để gọi hiệu ứng khi lưu thành công
          function exportGraph() {
+             // Tìm đường đi Eulerian
+             const eulerPath = findEulerianPath(dots, edges);
+             if(!eulerPath) {
+                 Swal.fire({
+                     icon: 'error',
+                     title: 'Không tìm thấy đường đi',
+                     text: 'Không thể tìm một đường đi qua tất cả các cạnh. Vui lòng kiểm tra lại đồ thị của bạn.',
+                     confirmButtonText: 'OK'
+                 });
+                 return;
+             }
+
              const data = {
                  dots: dots.map(dot => ({ x: dot.x, y: dot.y })),
                  edges: edges.map(edge => {
@@ -525,7 +600,8 @@
                          };
                      }
                      return edgeData;
-                 })
+                 }),
+                 guide: eulerPath
              };
 
              const jsonString = JSON.stringify(data, null, 2);
