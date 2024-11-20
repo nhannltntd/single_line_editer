@@ -818,7 +818,7 @@
              return Math.sqrt(dx * dx + dy * dy);
          }
 
-         // *** New Function: Check for edges with length less than 56 ***
+         // *** Modified Function: Check for edges with both lengths <50 and angle <90 degrees ***
          function checkEdgeLengths() {
              // Iterate through each dot to find triplets forming an angle
              for(let i = 0; i < dots.length; i++) {
@@ -838,14 +838,29 @@
                          const dotC = dots[otherDot2];
                          const length1 = calculateDistance(dotA, dotB);
                          const length2 = calculateDistance(dotA, dotC);
-                         if(length1 < 50 || length2 < 50) {
-                             Swal.fire({
-                                 icon: 'warning',
-                                 title: 'Mình chỉ cảnh báo chứ chưa xóa, ae vẽ lại giúp nhé!',
-                                 text: 'Một hoặc hai cạnh có độ dài quá bé sẽ khiến khi vẽ bị nhằm nét do các cạnh nằm quá gần nhau nhưng cạnh quá ngắn để app nhận diện lại!',
-                                 confirmButtonText: 'OK'
-                             });
-                             return; // Show warning once
+                         if(length1 < 50 && length2 < 50) { // Both edges are shorter than 50
+                             // Calculate vectors
+                             const vector1 = {x: dotB.x - dotA.x, y: dotB.y - dotA.y};
+                             const vector2 = {x: dotC.x - dotA.x, y: dotC.y - dotA.y};
+                             // Calculate dot product
+                             const dotProduct = vector1.x * vector2.x + vector1.y * vector2.y;
+                             // Calculate lengths
+                             const len1 = length1;
+                             const len2 = length2;
+                             // Avoid division by zero
+                             if(len1 === 0 || len2 === 0) continue;
+                             const cosTheta = dotProduct / (len1 * len2);
+                             // Calculate angle in degrees
+                             const angle = Math.acos(cosTheta) * (180 / Math.PI);
+                             if(angle < 90) { // Angle is less than 90 degrees
+                                 Swal.fire({
+                                     icon: 'warning',
+                                     title: 'Cảnh báo',
+                                     text: 'Hai cạnh kết nối với một điểm có độ dài nhỏ hơn 50 và góc giữa chúng nhỏ hơn 90 độ sẽ gây khó khăn cho việc nhận diện của ứng dụng!',
+                                     confirmButtonText: 'OK'
+                                 });
+                                 return; // Show warning once
+                             }
                          }
                      }
                  }
@@ -901,7 +916,7 @@
 
                  if(edgeExists(selectedDot, endDot)) {
                      Swal.fire({
-                         icon: 'warning',
+                         icon: 'error',
                          title: 'Dừng lại',
                          text: '2 điểm không được có hơn 1 cạnh nhé bro😏',
                          confirmButtonText: 'OK'
