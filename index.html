@@ -369,11 +369,11 @@
               <input type="range" id="curvatureSlider" min="-300" max="300" value="0" step="1"> <!-- Updated min and max -->
               <input type="number" id="curvatureInput" class="number-input" min="-300" max="300" value="0"> <!-- Updated min and max -->
               <button class="secondary" onclick="resetCurvature()"><span class="button-icon">🔄</span>Reset</button>
-              <!-- Removed the tick marks and labels -->
           </div>
           <input type="file" id="imageInput" accept="image/*" style="display: none">
           <button onclick="document.getElementById('imageInput').click()"><span class="button-icon">📤</span>Upload Image</button>
           <button onclick="toggleImageInteraction()" id="toggleBtn"><span class="button-icon">🎁</span>Enable Image Interaction</button>
+          <button onclick="window.open('https://nhannltntd.github.io/single_line_checker', '_blank')"><span class="button-icon">🔍</span>Single Line Checker</button>
       </div>
       <div class="container">
           <img id="imageLayer" style="display:none"> <!-- Moved above the canvas -->
