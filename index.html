@@ -811,6 +811,47 @@
              );
          }
          
+         // *** New Function: Calculate distance between two dots ***
+         function calculateDistance(dotA, dotB) {
+             const dx = dotA.x - dotB.x;
+             const dy = dotA.y - dotB.y;
+             return Math.sqrt(dx * dx + dy * dy);
+         }
+
+         // *** New Function: Check for edges with length less than 56 ***
+         function checkEdgeLengths() {
+             // Iterate through each dot to find triplets forming an angle
+             for(let i = 0; i < dots.length; i++) {
+                 // Find all edges connected to dot i
+                 const connectedEdges = edges.filter(edge => edge.start === i || edge.end === i);
+                 if(connectedEdges.length < 2) continue;
+                 // Check all pairs of connected edges
+                 for(let j = 0; j < connectedEdges.length; j++) {
+                     for(let k = j + 1; k < connectedEdges.length; k++) {
+                         const edge1 = connectedEdges[j];
+                         const edge2 = connectedEdges[k];
+                         // Get the other dot in each edge
+                         const otherDot1 = edge1.start === i ? edge1.end : edge1.start;
+                         const otherDot2 = edge2.start === i ? edge2.end : edge2.start;
+                         const dotA = dots[i];
+                         const dotB = dots[otherDot1];
+                         const dotC = dots[otherDot2];
+                         const length1 = calculateDistance(dotA, dotB);
+                         const length2 = calculateDistance(dotA, dotC);
+                         if(length1 < 50 || length2 < 50) {
+                             Swal.fire({
+                                 icon: 'warning',
+                                 title: 'Mình chỉ cảnh báo chứ chưa xóa, ae vẽ lại giúp nhé!',
+                                 text: 'Một hoặc hai cạnh có độ dài quá bé sẽ khiến khi vẽ bị nhằm nét do các cạnh nằm quá gần nhau nhưng cạnh quá ngắn để app nhận diện lại!',
+                                 confirmButtonText: 'OK'
+                             });
+                             return; // Show warning once
+                         }
+                     }
+                 }
+             }
+         }
+
          function handleMouseDown(e) {
              const rect = canvas.getBoundingClientRect();
              const x = ((e.clientX - rect.left) / scale) * (400/400);
@@ -860,7 +901,7 @@
 
                  if(edgeExists(selectedDot, endDot)) {
                      Swal.fire({
-                         icon: 'Cảnh báo!',
+                         icon: 'warning',
                          title: 'Dừng lại',
                          text: '2 điểm không được có hơn 1 cạnh nhé bro😏',
                          confirmButtonText: 'OK'
@@ -872,6 +913,7 @@
                          end: endDot,
                          curvature: parseInt(curvatureSlider.value)
                      });
+                     checkEdgeLengths(); // Check edge lengths after adding a new edge
                  }
              }
              
