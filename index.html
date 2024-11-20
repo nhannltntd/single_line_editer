@@ -4,6 +4,7 @@
       <title>Single Line Editor</title>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.0/dist/sweetalert2.min.css">
       <style>
+         /* Your existing CSS styles remain unchanged */
          :root {
              --primary: #0078d4;
              --primary-dark: #005a9e;
@@ -802,6 +803,14 @@
          canvas.addEventListener('mousemove', handleMouseMove);
          canvas.addEventListener('mouseup', handleMouseUp);
          
+         // *** New Function: Check if an edge already exists between two dots ***
+         function edgeExists(dot1, dot2) {
+             return edges.some(edge =>
+                 (edge.start === dot1 && edge.end === dot2) ||
+                 (edge.start === dot2 && edge.end === dot1)
+             );
+         }
+         
          function handleMouseDown(e) {
              const rect = canvas.getBoundingClientRect();
              const x = ((e.clientX - rect.left) / scale) * (400/400);
@@ -848,12 +857,22 @@
              
              const endDot = findNearestDot(x, y);
              if(endDot !== null && endDot !== selectedDot) {
-                 saveState(); // Save state before adding an edge
-                 edges.push({
-                     start: selectedDot,
-                     end: endDot,
-                     curvature: parseInt(curvatureSlider.value)
-                 });
+
+                 if(edgeExists(selectedDot, endDot)) {
+                     Swal.fire({
+                         icon: 'Cảnh báo!',
+                         title: 'Dừng lại',
+                         text: '2 điểm không được có hơn 1 cạnh nhé bro😏',
+                         confirmButtonText: 'OK'
+                     });
+                 } else {
+                     saveState(); 
+                     edges.push({
+                         start: selectedDot,
+                         end: endDot,
+                         curvature: parseInt(curvatureSlider.value)
+                     });
+                 }
              }
              
              isDragging = false;
