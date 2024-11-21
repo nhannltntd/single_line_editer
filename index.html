@@ -914,7 +914,7 @@
                          const dotC = dots[otherDot2];
                          const length1 = calculateDistance(dotA, dotB);
                          const length2 = calculateDistance(dotA, dotC);
-                         if(length1 < 50 && length2 < 50) { // Both edges are shorter than 50
+                         if(length1 < 50 || length2 < 50) { // Both edges are shorter than 50
                              // Calculate vectors
                              const vector1 = {x: dotB.x - dotA.x, y: dotB.y - dotA.y};
                              const vector2 = {x: dotC.x - dotA.x, y: dotC.y - dotA.y};
