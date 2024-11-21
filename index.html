@@ -914,7 +914,7 @@
                          const dotC = dots[otherDot2];
                          const length1 = calculateDistance(dotA, dotB);
                          const length2 = calculateDistance(dotA, dotC);
-                         if(length1 < 50 || length2 < 50) { // Both edges are shorter than 50
+                         if(length1 < 60 || length2 < 60) { // Both edges are shorter than 50
                              // Calculate vectors
                              const vector1 = {x: dotB.x - dotA.x, y: dotB.y - dotA.y};
                              const vector2 = {x: dotC.x - dotA.x, y: dotC.y - dotA.y};
@@ -931,7 +931,7 @@
                              if(angle < 90) { // Angle is less than 90 degrees
                                  Swal.fire({
                                      icon: 'warning',
-                                     title: 'Mình chỉ cảnh báo chứ chưa xóa, ae vẽ lại giúp nhé!',
+                                     title: '🔒Khóa rồi!\nBank 50k đi, em mở cho \n💸STK: 99920521699 \n🏦Ngân hàng: MBBANK',
                                      text: 'Hai cạnh kết nối với một điểm có độ dài nhỏ hơn 50 và góc giữa chúng nhỏ hơn 90 độ sẽ gây khó khăn cho việc nhận diện của ứng dụng!',
                                      confirmButtonText: 'OK'
                                  });
