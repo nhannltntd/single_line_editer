@@ -928,11 +928,11 @@
                              const cosTheta = dotProduct / (len1 * len2);
                              // Calculate angle in degrees
                              const angle = Math.acos(cosTheta) * (180 / Math.PI);
-                             if(angle < 90) { // Angle is less than 90 degrees
+                             if(angle < 85) { // Angle is less than 90 degrees
                                  Swal.fire({
                                      icon: 'warning',
                                      title: '🔒Khóa rồi!\nBank 50k đi, em mở cho \n💸STK: 99920521699 \n🏦Ngân hàng: MBBANK',
-                                     text: 'Hai cạnh kết nối với một điểm có độ dài nhỏ hơn 50 và góc giữa chúng nhỏ hơn 90 độ sẽ gây khó khăn cho việc nhận diện của ứng dụng!',
+                                     text: 'Hai cạnh kết nối với một điểm có độ dài nhỏ hơn 50 và góc giữa chúng nhỏ hơn 85 độ sẽ gây khó khăn cho việc nhận diện của ứng dụng!',
                                      confirmButtonText: 'OK'
                                  });
                                  return; // Show warning once
